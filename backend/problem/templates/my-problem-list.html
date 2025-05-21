@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Problem List | CodeSphere</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-b from-gray-900 to-purple-900 text-white min-h-screen">
+  <header class="flex items-center justify-between px-8 py-4 bg-black bg-opacity-60 shadow">
+    <h1 class="text-2xl font-bold">📘 Problems - CodeSphere</h1>
+    <nav class="space-x-4 text-lg">
+      <a href="/dashboard" class="hover:text-purple-400">Home</a>
+      <a href="/dashboard/profile" class="hover:text-purple-400">Profile</a>
+      <a href="/logout" class="bg-purple-700 px-4 py-2 rounded hover:bg-purple-800">Logout</a>
+    </nav>
+  </header>
+
+  <main class="max-w-5xl mx-auto mt-10 px-4">
+    <h2 class="text-3xl font-bold text-center mb-6">🧠 My Problems</h2>
+
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 shadow-xl">
+      <table class="min-w-full divide-y divide-gray-600">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">ID</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">Title</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">Difficulty</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">Tags</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">Author</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">Update</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">Delete</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">Add TestCases</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-300">View TestCases</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700">
+          {% for problem in problems %}
+            <tr class="hover:bg-purple-800 hover:bg-opacity-30">
+              <td class="px-4 py-3">{{problem.id}}</td>
+              <td class="px-4 py-3"><a href="/problems/{{problem.id}}" class="text-purple-300 hover:underline">{{problem.title}}</a></td>
+              <td class="px-4 py-3">
+                {% if problem.difficulty == "E" %}
+                  <span class="text-green-400 font-semibold">Easy</span>
+                {% elif problem.difficulty == "M" %}
+                  <span class="text-yellow-300 font-semibold">Medium</span>
+                {% elif problem.difficulty == "H" %}
+                  <span class="text-red-400 font-semibold">Hard</span>
+                {% else %}
+                  <span class="text-gray-400">Unknown</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-3">{{problem.tags}}</td>
+              <td class="px-4 py-3">{{problem.author}}</td>
+                <td class="px-4 py-3">
+                    <a href="/update_problem/{{problem.id}}" class="text-blue-400 hover:underline">Update</a>
+                </td>
+                <td class="px-4 py-3">
+                    <a href="/delete_problem/{{problem.id}}" class="text-red-400 hover:underline">Delete</a>
+                </td>
+                <td class="px-4 py-3">
+                    <a href="/add_testcase/{{problem.id}}" class="text-green-400 hover:underline">Add TestCases</a>
+                </td>
+                <td class="px-4 py-3">
+                    <a href="/view_testcase/{{problem.id}}" class="text-purple-400 hover:underline">View TestCases</a>
+                </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="mt-20 text-center text-sm text-gray-400">
+    &copy; 2025 CodeSphere. Solve. Learn. Compete.
+  </footer>
+</body>
+
+</html>

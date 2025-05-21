@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Testcases | CodeSphere</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 to-purple-900 min-h-screen flex items-center justify-center text-white px-4">
+  <div class="bg-black bg-opacity-60 p-8 rounded-xl shadow-xl w-full max-w-5xl">
+    <h2 class="text-3xl font-bold mb-6 text-center">
+      🧪 Testcases for Problem: <span class="text-purple-400">{{ problem.title }}</span>
+    </h2>
+
+    <table class="w-full text-left border-collapse overflow-x-auto text-sm md:text-base">
+      <thead>
+        <tr class="bg-purple-800 text-white">
+          <th class="px-6 py-3 font-semibold uppercase tracking-wider">#</th>
+          <th class="px-6 py-3 font-semibold uppercase tracking-wider">Input File</th>
+          <th class="px-6 py-3 font-semibold uppercase tracking-wider">Output File</th>
+          <th class="px-6 py-3 font-semibold uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tc in testcases %}
+        <tr class="bg-gray-800 border-b border-purple-700">
+          <td class="px-6 py-4">{{ forloop.counter }}</td>
+
+          <td class="px-6 py-4">
+            {% if tc.input_file %}
+            <a href="{{ tc.input_file.url }}" download class="text-blue-400 hover:text-blue-300 underline">
+              ⬇ Download Input
+            </a>
+            {% else %}
+            <span class="text-red-400">No input file</span>
+            {% endif %}
+          </td>
+
+          <td class="px-6 py-4">
+            {% if tc.output_file %}
+            <a href="{{ tc.output_file.url }}" download class="text-blue-400 hover:text-blue-300 underline">
+              ⬇ Download Output
+            </a>
+            {% else %}
+            <span class="text-red-400">No output file</span>
+            {% endif %}
+          </td>
+
+          <td class="px-6 py-4">
+            <form action="/delete_testcase/{{ problem.id }}/{{ tc.id }}" method="post"
+              onsubmit="return confirm('Are you sure you want to delete this testcase?');">
+              {% csrf_token %}
+              <button type="submit" class="text-red-500 hover:text-red-400 underline">
+                🗑 Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="mt-6 text-center">
+      <a href="/dashboard" class="text-sm text-gray-300 hover:underline">⬅ Back to Dashboard</a>
+    </div>
+  </div>
+</body>
+
+</html>

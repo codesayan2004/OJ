@@ -1,0 +1,12 @@
+# Virtual environment
+myenv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Other common ignores
+*.env
+*.log
+*.sqlite3
+*.egg-info/

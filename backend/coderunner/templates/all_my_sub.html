@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ showModal: false, modalCode: '' }" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Submissions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 min-h-screen text-white font-sans">
+
+    <!-- Header -->
+    <header class="bg-black bg-opacity-60 shadow-md px-6 py-4 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-purple-400">📊 Submissions</h1>
+        <nav class="space-x-4 text-lg">
+            <a href="/dashboard" class="hover:text-purple-300">🏠 Dashboard</a>
+            <a href="/dashboard/profile" class="hover:text-purple-300">👤 Profile</a>
+            <a href="/logout" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md">Logout</a>
+        </nav>
+    </header>
+
+    <!-- Table Section -->
+    <main class="max-w-7xl mx-auto py-10 px-6">
+        <div class="bg-gray-800 bg-opacity-80 rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold text-purple-300 mb-6">📄 Your Submissions</h2>
+
+            <div class="overflow-x-auto rounded-lg border border-purple-600">
+                <table class="min-w-full divide-y divide-purple-600 text-sm text-left">
+                    <thead class="bg-black text-purple-300">
+                        <tr>
+                            <th class="px-6 py-3">#</th>
+                            <th class="px-6 py-3">🧩 Problem</th>
+                            <th class="px-6 py-3">📝 Language</th>
+                            <th class="px-6 py-3">📅 Submitted At</th>
+                            <th class="px-6 py-3">📦 Status</th>
+                            <th class="px-6 py-3">📋 Verdict</th>
+                            <th class="px-6 py-3 text-center">👁 View Code</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-purple-700">
+                        {% for submission in submissions %}
+                        <tr class="hover:bg-purple-800/30 transition">
+                            <td class="px-6 py-4 text-gray-300">{{ forloop.counter }}</td>
+                            <td class="px-6 py-4 text-purple-100 font-semibold">
+                                {{ submission.prob.title }}
+                            </td>
+                            <td class="px-6 py-4">{{ submission.get_language_display }}</td>
+                            <td class="px-6 py-4">{{ submission.submission_time|date:"Y-m-d H:i:s" }}</td>
+                            <td class="px-6 py-4">
+                                {% if submission.status == "pending" %}
+                                <span class="text-yellow-400 font-semibold">⏳ Pending</span>
+                                {% else %}
+                                <span class="text-green-400 font-semibold">✅ Done</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if submission.verdict == "Accepted" %}
+                                <span class="text-green-500 font-bold">✔️ {{ submission.verdict }}</span>
+                                {% elif submission.verdict == "Wrong Answer" %}
+                                <span class="text-red-500 font-bold">❌ {{ submission.verdict }}</span>
+                                {% else %}
+                                <span class="text-yellow-500 font-bold">⚠️ {{ submission.verdict }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <button class="text-purple-400 hover:text-purple-200 transition"
+                                    @click='modalCode = "{{ submission.code|escapejs }}"; showModal = true'
+                                    title="View Code">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                                    </svg>
+                                </button>
+                            </td>
+
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-400">No submissions found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div x-show="showModal" x-transition @keydown.escape.window="showModal = false"
+        class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70">
+        <div class="bg-gray-900 rounded-lg max-w-3xl w-full mx-4 p-6 relative shadow-lg">
+            <button @click="showModal = false"
+                class="absolute top-3 right-3 text-white text-xl hover:text-purple-400 transition">
+                ✖
+            </button>
+            <h3 class="text-xl font-bold text-purple-300 mb-4">🧠 Submitted Code</h3>
+            <pre class="bg-black p-4 rounded-lg text-green-400 overflow-x-auto max-h-[70vh]" x-text="modalCode"></pre>
+        </div>
+    </div>
+
+    <footer class="text-center mt-10 text-sm text-gray-500">
+        © 2025 CodeSphere • Review your logic. Improve your rank.
+    </footer>
+</body>
+
+</html>
