@@ -21,6 +21,16 @@
   <main class="max-w-5xl mx-auto mt-10 px-4">
     <h2 class="text-3xl font-bold text-center mb-6">🧠 Available Problems</h2>
 
+    <!-- Search Bar -->
+    <div class="mb-6">
+      <input
+        type="text"
+        id="searchBar"
+        placeholder="🔍 Search by title..."
+        class="w-full md:w-1/2 px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+      />
+    </div>
+
     <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 shadow-xl">
       <table class="min-w-full divide-y divide-gray-600">
         <thead>
@@ -34,9 +44,13 @@
         </thead>
         <tbody class="divide-y divide-gray-700">
           {% for problem in problems %}
-            <tr class="hover:bg-purple-800 hover:bg-opacity-30">
+            <tr class="problem-row hover:bg-purple-800 hover:bg-opacity-30">
               <td class="px-4 py-3">{{problem.id}}</td>
-              <td class="px-4 py-3"><a href="/problems/{{problem.id}}" class="text-purple-300 hover:underline">{{problem.title}}</a></td>
+              <td class="px-4 py-3">
+                <a href="/problems/{{problem.id}}" class="text-purple-300 hover:underline">
+                  {{problem.title}}
+                </a>
+              </td>
               <td class="px-4 py-3">
                 {% if problem.difficulty == "E" %}
                   <span class="text-green-400 font-semibold">Easy</span>
@@ -60,6 +74,22 @@
   <footer class="mt-20 text-center text-sm text-gray-400">
     &copy; 2025 CodeSphere. Solve. Learn. Compete.
   </footer>
+
+  <!-- JavaScript for search functionality -->
+  <script>
+    const searchBar = document.getElementById('searchBar');
+    const rows = document.querySelectorAll('.problem-row');
+
+    searchBar.addEventListener('keyup', function () {
+      const query = this.value.toLowerCase().trim();
+
+      rows.forEach(row => {
+        const titleCell = row.querySelector('td:nth-child(2)');
+        const titleText = titleCell?.innerText.toLowerCase() || "";
+        row.style.display = titleText.includes(query) ? '' : 'none';
+      });
+    });
+  </script>
 </body>
 
 </html>
