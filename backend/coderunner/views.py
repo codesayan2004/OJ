@@ -10,16 +10,23 @@ from pathlib import Path
 import subprocess
 import uuid, os
 from submission.models import TestCase
+#from google import genai
+import google.generativeai as genai
 
 # Create your views here.
 
-def particular_problem(request, problem_id):
+def particular_problem(request, problem_id, *args, **kwargs):
     if request.user.is_authenticated:
         problem = Problem.objects.get(id=problem_id)
         context = {
             'problem': problem,
+            'user_code': kwargs.get('user_code', ''),  # Code submitted by the user
+            'user_language': kwargs.get('user_language', 'py'),  # Language selected by the user
+            'custom_input': kwargs.get('custom_input', ''),  # Custom input provided by the user
+            'result': kwargs.get('result', ''),  # Result of the code execution
         }
-        template = loader.get_template('part_problem.html')
+        #template = loader.get_template('part_problem.html')
+        template = loader.get_template('problem2.html')
         return HttpResponse(template.render(context, request))
     else:
         messages.error(request, 'You must be logged in to view problem.')
@@ -31,9 +38,6 @@ def run_particular_problem(request, problem_id):
         code = request.POST.get('code')
         language = request.POST.get('language')
         input_data = request.POST.get('custom_input')
-        print("Code:", code)
-        print("Language:", language)
-        print("Input Data:", input_data)
         print("Running of code Successful!")
         # Run the code
         result = run(code, language, input_data)
@@ -44,9 +48,9 @@ def run_particular_problem(request, problem_id):
             'user_code': code,
             'user_language': language,
         }
-
-        template = loader.get_template('part_problem.html')
-        return HttpResponse(template.render(context, request))
+        return particular_problem(request, problem_id, user_code=code, user_language=language, custom_input=input_data, result=result)
+        # template = loader.get_template('problem2.html')
+        # return HttpResponse(template.render(context, request))
 
     else:
         context = {
@@ -54,10 +58,38 @@ def run_particular_problem(request, problem_id):
             'user_code': '',  # No code initially
             'user_language': 'py',
         }
-        template = loader.get_template('part_problem.html')
+        return redirect('/problems/' + str(problem_id) + '/')
+        # template = loader.get_template('part_problem.html')
+        # return HttpResponse(template.render(context, request))
+
+genai.configure(api_key="AIzaSyBMBYNtPXegEqCdduQ_lGA8UTlo2dUHPMk")
+model = genai.GenerativeModel("gemini-1.5-flash")
+def ai_review(request, problem_id):
+    prob = Problem.objects.get(id=problem_id)
+    if request.method == 'POST':
+        run_particular_problem(request,problem_id)
+        code = request.POST.get('code')
+        language = request.POST.get('language')
+        print("Code for AI:", code)
+        prompt = f"Please review the following code and give suggestions for improvemen any bug/error. Dont provide any code. only give short text suggession:\n\n{code}"
+        #prompt = "What is Google Gemini"
+        response = model.generate_content(prompt)
+        template = loader.get_template("ai-review.html")
+        context = {
+            'problem':prob,
+            'ai_feedback': response.text,
+            'user_code': code
+        }
+        return HttpResponse(template.render(context,request))
+    else:
+        context = {
+            'problem': prob,
+        }
+        template = loader.get_template('problem2.html')
         return HttpResponse(template.render(context, request))
 
-        
+    
+
 def submit_code(request, problem_id):
     prob = Problem.objects.get(id=problem_id)
     print(prob.title)

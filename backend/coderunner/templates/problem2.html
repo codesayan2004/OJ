@@ -30,7 +30,7 @@
 
     <main class="max-w-7xl mx-auto p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Problem Statement -->
-        <section class="bg-gray-800 bg-opacity-80 rounded-xl p-6 shadow-lg overflow-y-auto max-h-[100vh]">
+        <section class="bg-gray-800 bg-opacity-80 rounded-xl p-6 shadow-lg overflow-y-auto max-h-[120vh]">
             <h2 class="text-2xl font-bold text-purple-300 mb-4">🧩Problem: {{problem.title}}</h2>
             <p class="mb-3">{{problem.statement}}</p>
             <h2 class="text-xl font-semibold mt-6">Input:</h2>
@@ -57,20 +57,21 @@ Output:
         <!-- Code Editor -->
         <form id="code-form" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <section class="bg-gray-800 bg-opacity-80 rounded-xl p-6 shadow-lg flex flex-col h-[100vh]">
+            <section class="bg-gray-800 bg-opacity-80 rounded-xl p-6 shadow-lg flex flex-col h-[120vh]">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-semibold text-purple-300">🖋️ Code Here</h2>
                     <select id="language-select" name="language"
                         class="bg-black text-white border border-purple-500 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        <option value="python">Python</option>
-                        <option value="cpp">C++</option>
-                        <option value="java">Java</option>
+                        <option value="py" {% if user_language == 'py' %}selected{% endif %}>Python</option>
+                        <option value="cpp" {% if user_language == 'cpp' %}selected{% endif %}>C++</option>
+                        <option value="c" {% if user_language == 'c' %}selected{% endif %}>C</option>
                     </select>
+
                 </div>
         
                 <div class="flex-1 w-full bg-black text-white rounded-lg overflow-hidden">
                     <div id="editor" class="rounded-lg"></div>
-                    <textarea name="code" id="code" class="hidden"></textarea>
+                    <textarea name="code" id="code" class="hidden">{{user_code}}</textarea>
                 </div>
         
                 <div class="mt-6">
@@ -81,23 +82,28 @@ Output:
                 </div>
         
                 {% if result %}
-                <div class="mt-6 bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-lg">
+                <div class="mt-6 bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-lg max-h-64 overflow-auto">
                     <h2 class="text-xl font-semibold text-purple-300 mb-2">📤 Output:</h2>
                     <pre class="bg-black text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">{{ result }}</pre>
                 </div>
-                {% endif %}
-        
-                <div class="flex justify-end mt-4 space-x-4">
-                    <button type="submit" id="run-button"
-                        class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-md text-black font-semibold shadow">
-                        ▶️ Run
-                    </button>
-                    <button type="submit" id="submit-button"
-                        class="bg-green-500 hover:bg-green-600 px-6 py-2 rounded-md text-black font-semibold shadow">
-                        🚀 Submit
-                    </button>
-                </div>
-            </section>
+                
+            {% endif %}
+
+            <div class="flex justify-end mt-4 space-x-4">
+                <button type="submit" id="run-button"
+                    class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-md text-black font-semibold shadow">
+                    ▶️ Run
+                </button>
+                <button type="submit" id="ai-review-button"
+                    class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-md text-white font-semibold shadow">
+                    🤖 AI Review
+                </button>
+                <button type="submit" id="submit-button"
+                    class="bg-green-500 hover:bg-green-600 px-6 py-2 rounded-md text-black font-semibold shadow">
+                    🚀 Submit
+                </button>
+            </div>
+        </section>
         </form>
     </main>
 
@@ -110,28 +116,79 @@ Output:
     <script>
         let editor;
 
+        const initialCode = `{{ user_code|escapejs }}`;  // Escapes quotes and newlines for JS safety
+        const initialLang = "{{ user_language|default:'py' }}";
+
         require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
         require(['vs/editor/editor.main'], function () {
             editor = monaco.editor.create(document.getElementById('editor'), {
-                value: '# Write your solution here\n',
-                language: 'python',
+                value: initialCode || '# Write your solution here hatt\n',
+                language: initialLang === 'py' ? 'python' : initialLang,
                 theme: 'vs-dark',
                 fontSize: 16,
                 automaticLayout: true,
             });
 
             const langMap = {
-                python: 'python',
+                py: 'python',
                 cpp: 'cpp',
-                java: 'java'
+                c: 'cpp'
+            };
+            const defaultSnippets = {
+                py: '# Write your Python solution here\n',
+                cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your C++ solution here\n    return 0;\n}',
+                c: '#include <stdio.h>\n\nint main() {\n    // Write your C solution here\n    return 0;\n}'
             };
 
             document.getElementById('language-select').addEventListener('change', function () {
                 const selectedLang = this.value;
-                monaco.editor.setModelLanguage(editor.getModel(), langMap[selectedLang]);
+                const model = editor.getModel();
+                const currentCode = model.getValue();
+                const langMap = { py: 'python', cpp: 'cpp', c: 'c' };
+
+                // Check if the current code is empty or matches a default (optional safety)
+                const isEmpty = !currentCode.trim();
+                const isDefault = Object.values(defaultSnippets).includes(currentCode.trim());
+
+                editor.setValue(defaultSnippets[selectedLang]);
+
+                monaco.editor.setModelLanguage(model, langMap[selectedLang]);
             });
+
         });
     </script>
+
+    <script>
+        const form = document.getElementById('code-form');
+        const runButton = document.getElementById('run-button');
+        const submitButton = document.getElementById('submit-button');
+        const codeTextarea = document.getElementById('code');
+
+        let runUrl = '/problems/{{ problem.id }}/run/';
+        let submitUrl = '/problems/{{ problem.id }}/submit/'; // update this to your actual submit endpoint
+        let aiReviewUrl = '/problems/{{ problem.id }}/ai_review/'; // update this to your actual AI review endpoint
+        const aiReviewButton = document.getElementById('ai-review-button');
+
+        // Update form action based on which button is clicked
+        runButton.addEventListener('click', function () {
+            form.action = runUrl;
+        });
+
+        submitButton.addEventListener('click', function () {
+            form.action = submitUrl;
+        });
+        aiReviewButton.addEventListener('click', function () {
+            form.action = aiReviewUrl;
+        });
+
+        // Before submitting the form, sync Monaco editor content to the textarea
+        form.addEventListener('submit', function (e) {
+            if (editor) {
+                codeTextarea.value = editor.getValue();
+            }
+        });
+    </script>
+
 </body>
 
 </html>
