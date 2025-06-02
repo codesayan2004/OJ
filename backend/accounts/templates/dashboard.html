@@ -1,54 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | CodeSphere</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    // Toggle mobile menu
-    function toggleMenu() {
-      const menu = document.getElementById('mobile-menu');
-      menu.classList.toggle('hidden');
-    }
-  </script>
-</head>
-
-<body class="bg-gradient-to-br from-gray-900 to-purple-900 min-h-screen text-white">
-  <header class="px-4 py-4 bg-black bg-opacity-50 shadow md:px-8">
-    <div class="flex items-center justify-between">
-      <h1 class="text-3xl font-bold">👨‍💻 CodeSphere</h1>
-      <button class="md:hidden text-white focus:outline-none" onclick="toggleMenu()">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </button>
-      <nav class="hidden md:flex space-x-6 text-lg">
-        <a href="/problems" class="hover:text-purple-400 transition">Problems</a>
-        <a href="/myproblems" class="hover:text-purple-400 transition">My Problems</a>
-        <a href="/mysubmissions" class="hover:text-purple-400 transition">Submissions</a>
-        <a href="/add_problem" class="hover:text-purple-400 transition">Add Problem</a>
-        <a href="/dashboard/profile/" class="hover:text-purple-400 transition">Profile</a>
-        <a href="/logout"
-          class="bg-purple-700 px-4 py-2 rounded-lg hover:bg-purple-800 transition">Logout</a>
-      </nav>
-    </div>
-    <!-- Mobile Menu -->
-    <nav id="mobile-menu" class="md:hidden mt-4 flex flex-col space-y-2 text-lg hidden">
-      <a href="/problems" class="hover:text-purple-400 transition">Problems</a>
-      <a href="/myproblems" class="hover:text-purple-400 transition">My Problems</a>
-      <a href="/mysubmissions" class="hover:text-purple-400 transition">Submissions</a>
-      <a href="/add_problem" class="hover:text-purple-400 transition">Add Problem</a>
-      <a href="/dashboard/profile/" class="hover:text-purple-400 transition">Profile</a>
-      <a href="/logout"
-        class="bg-purple-700 px-4 py-2 rounded-lg hover:bg-purple-800 transition text-center">Logout</a>
-    </nav>
-  </header>
-
-  <main class="flex flex-col items-center justify-center text-center mt-20 px-4">
+{% block title %}Dashboard | CodeSphere{% endblock %}
+{% block heading %}👨‍💻 CodeSphere {% endblock %}
+{% block content %} 
+<main class="flex flex-col items-center justify-center text-center mt-20 px-4">
     <h2 class="text-5xl font-extrabold mb-4">Welcome to CodeSphere!</h2>
     <p class="text-xl text-gray-300 max-w-2xl mb-10">Your one-stop platform to enhance coding skills, compete in
       contests, and become a master problem solver. Dive into challenges and track your journey to greatness!</p>
@@ -67,11 +22,7 @@
         ⬅ Back to Home
       </a>
     </div>
-  </main>
+</main>
+{% endblock %}
 
-  <footer class="mt-24 text-center text-gray-400 text-sm pb-4">
-    &copy; 2025 CodeSphere. Built with 💻 and ❤️ by passionate coders.
-  </footer>
-</body>
 
-</html>

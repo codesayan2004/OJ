@@ -136,7 +136,7 @@ def submit_code(request, problem_id):
         # Save the verdict
         submission.save()
         # Redirect to a success page or render a template with the result
-        template = loader.get_template('my_prob_sub.html')
+        template = loader.get_template('all_my_sub.html')
         sub = CodeSubmission.objects.filter(prob=prob, user=request.user).order_by('-submission_time')
         context = {
             'submissions': sub,

@@ -77,3 +77,31 @@ def profile(request):
     else:
         messages.info(request, "You need to login first")
         return redirect('/login')
+    
+def profile_edit(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            user = request.user
+            user.first_name = request.POST.get('firstname')
+            user.last_name = request.POST.get('lastname')
+            user.email = request.POST.get('email')
+            user.save()
+            messages.success(request, "Profile updated successfully")
+            return redirect('/dashboard/profile')
+        
+        template = loader.get_template('edit_profile.html')
+        context = {"user": request.user}
+        return HttpResponse(template.render(context, request))
+    else:
+        messages.info(request, "You need to login first")
+        return redirect('/login')
+    
+def profile_delete(request):
+    if request.user.is_authenticated:
+        user = request.user
+        user.delete()
+        messages.success(request, "Profile deleted successfully")
+        return redirect('/')
+    else:
+        messages.info(request, "You need to login first")
+        return redirect('/login')

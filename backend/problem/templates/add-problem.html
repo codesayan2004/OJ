@@ -1,87 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block title %}Add Problem{% endblock %}
+{% block heading %}➕ Add Problem - CodeSphere{% endblock %}
+{% block content %} 
+<main class="max-w-3xl mx-auto mt-10 px-6">
+  <h2 class="text-3xl font-bold text-center mb-8">📝 Submit New Problem</h2>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Problem | CodeSphere</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
+  <form enctype="multipart/form-data" method="POST" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 shadow-xl space-y-6">
+    {% csrf_token %}
 
-<body class="bg-gradient-to-b from-gray-900 to-purple-900 text-white min-h-screen">
-  <header class="flex items-center justify-between px-8 py-4 bg-black bg-opacity-60 shadow">
-    <h1 class="text-2xl font-bold">➕ Add Problem - CodeSphere</h1>
-    <nav class="space-x-4 text-lg">
-      <a href="/dashboard" class="hover:text-purple-400">Home</a>
-      <a href="/dashboard/profile" class="hover:text-purple-400">Profile</a>
-      <a href="/logout" class="bg-purple-700 px-4 py-2 rounded hover:bg-purple-800">Logout</a>
-    </nav>
-  </header>
+    <div>
+      <label for="title" class="block mb-1 font-semibold">Title</label>
+      <input type="text" name="title" id="title" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required>
+    </div>
 
-  <main class="max-w-3xl mx-auto mt-10 px-6">
-    <h2 class="text-3xl font-bold text-center mb-8">📝 Submit New Problem</h2>
+    <div>
+      <label for="statement" class="block mb-1 font-semibold">Statement</label>
+      <textarea name="statement" id="statement" rows="6" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required></textarea>
+    </div>
 
-    <form enctype="multipart/form-data" method="POST" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 shadow-xl space-y-6">
-      {% csrf_token %}
+    <div>
+      <label for="Input" class="block text-sm font-medium text-gray-300">Input: </label>
+      <textarea id="constraints" name="input" rows="4" class="mt-1 block w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter input format"></textarea>
+    </div>
 
+    <div>
+      <label for="Output" class="block text-sm font-medium text-gray-300">Output: </label>
+      <textarea id="constraints" name="output" rows="4" class="mt-1 block w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter output format"></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6">
       <div>
-        <label for="title" class="block mb-1 font-semibold">Title</label>
-        <input type="text" name="title" id="title" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required>
-      </div>
-
-      <div>
-        <label for="statement" class="block mb-1 font-semibold">Statement</label>
-        <textarea name="statement" id="statement" rows="6" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required></textarea>
-      </div>
-
-      <div>
-        <label for="Input" class="block text-sm font-medium text-gray-300">Input: </label>
-        <textarea id="constraints" name="input" rows="4" class="mt-1 block w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter input format"></textarea>
+        <label for="sample_in" class="block mb-1 font-semibold">Sample Input</label>
+        <textarea name="sample_in" id="sample_in" rows="4" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required></textarea>
       </div>
 
       <div>
-        <label for="Output" class="block text-sm font-medium text-gray-300">Output: </label>
-        <textarea id="constraints" name="output" rows="4" class="mt-1 block w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter output format"></textarea>
+        <label for="sample_out" class="block mb-1 font-semibold">Sample Output</label>
+        <textarea name="sample_out" id="sample_out" rows="4" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required></textarea>
       </div>
+    </div>
 
-      <div class="grid grid-cols-2 gap-6">
-        <div>
-          <label for="sample_in" class="block mb-1 font-semibold">Sample Input</label>
-          <textarea name="sample_in" id="sample_in" rows="4" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required></textarea>
-        </div>
+    <div>
+      <label for="tags" class="block mb-1 font-semibold">Tags (comma separated)</label>
+      <input type="text" name="tags" id="tags" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400">
+    </div>
 
-        <div>
-          <label for="sample_out" class="block mb-1 font-semibold">Sample Output</label>
-          <textarea name="sample_out" id="sample_out" rows="4" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required></textarea>
-        </div>
-      </div>
-
+    <div class="grid grid-cols-2 gap-6">
       <div>
-        <label for="tags" class="block mb-1 font-semibold">Tags (comma separated)</label>
-        <input type="text" name="tags" id="tags" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400">
+        <label for="difficulty" class="block mb-1 font-semibold">Difficulty</label>
+        <select name="difficulty" id="difficulty" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required>
+          <option value="E">Easy</option>
+          <option value="M">Medium</option>
+          <option value="H">Hard</option>
+        </select>
       </div>
+    </div>
 
-      <div class="grid grid-cols-2 gap-6">
-        <div>
-          <label for="difficulty" class="block mb-1 font-semibold">Difficulty</label>
-          <select name="difficulty" id="difficulty" class="w-full p-2 rounded bg-gray-800 text-white border border-purple-400" required>
-            <option value="E">Easy</option>
-            <option value="M">Medium</option>
-            <option value="H">Hard</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="text-center">
-        <button type="submit" class="bg-purple-700 px-6 py-2 rounded-lg hover:bg-purple-800 text-lg font-semibold">Add Problem</button>
-      </div>
-      
-    </form>
-  </main>
-
-  <footer class="mt-20 text-center text-sm text-gray-400">
-    &copy; 2025 CodeSphere. Solve. Learn. Compete.
-  </footer>
-</body>
-
-</html>
+    <div class="text-center">
+      <button type="submit" class="bg-purple-700 px-6 py-2 rounded-lg hover:bg-purple-800 text-lg font-semibold">Add Problem</button>
+    </div>
+    
+  </form>
+</main>
+{% endblock %}
