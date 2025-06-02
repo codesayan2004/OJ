@@ -1,6 +1,6 @@
-# 🧑‍⚖️ OJ — Online Judge Platform
+# 🧑‍⚖️ CodeSphere - Online Coding Platform
 
-OJ is an Online Judge web application that allows users to solve programming problems, compile code online, and submit solutions for automated evaluation — similar to platforms like Codeforces and LeetCode.
+CodeSphere is a web application that allows users to solve programming problems, compile code online, and submit solutions for automated evaluation, add problems — similar to platforms like Codeforces and LeetCode.
 
 ---
 
