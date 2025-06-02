@@ -1,5 +1,7 @@
 # Virtual environment
 myenv/
+backend/media/
+.DS_Store
 
 # Python cache
 __pycache__/
