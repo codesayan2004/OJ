@@ -32,9 +32,9 @@ CodeSphere is a web application that allows users to solve programming problems,
 ```bash
 git clone https://github.com/codesayan2004/OJ.git
 cd OJ
-cd backend
 python -m venv myenv
 source myenv/bin/activate
+cd backend
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
