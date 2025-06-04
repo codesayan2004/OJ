@@ -4,6 +4,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.template import loader
+from django.contrib.messages import get_messages
+from coderunner.models import CodeSubmission
+from problem.models import Problem
 # Create your views here.
 
 def home(request):
@@ -20,7 +23,7 @@ def register_user(request):
         confirn_password = request.POST.get('confirm_password')
         # Perform validation checks here
         if (password != confirn_password):
-            messages.info(request,"Password Do Not Match")
+            messages.error(request,"Password Do Not Match")
             return redirect('/register')
         user = User.objects.filter(username=username)
         if user.exists():
@@ -39,6 +42,7 @@ def register_user(request):
 
 
 def login_user(request):
+    list(get_messages(request))
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -48,7 +52,7 @@ def login_user(request):
             messages.success(request, "Login successful")
             return redirect('/dashboard')
         else:
-            messages.info(request, "Invalid credentials")
+            messages.error(request, "Invalid credentials")
             return redirect('/login')
 
     template = loader.get_template('login.html')
@@ -62,8 +66,18 @@ def logout_user(request):
 
 def dashboard(request):
     if request.user.is_authenticated:
+        user = request.user
+        problems_solved = CodeSubmission.objects.filter(user=user, verdict='Accepted').values('prob').distinct().count()
+        problems_contributed = Problem.objects.filter(author=user).count()
+        total_problems = Problem.objects.count()
         template = loader.get_template('dashboard.html')
-        context = {}
+        progress_percent = round((problems_solved / total_problems) * 100) if total_problems else 0
+        context = {
+            "problems_solved": problems_solved,
+            "problems_contributed": problems_contributed,
+            "total_problems": total_problems,
+            "progress_percent": progress_percent,
+        }
         return HttpResponse(template.render(context, request))
     else:
         messages.info(request, "You need to login first")

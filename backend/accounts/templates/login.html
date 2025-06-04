@@ -14,10 +14,20 @@
         <form action="#" method="POST" class="space-y-4">
             {% csrf_token %}
             {% if messages %}
-                <div class="mb-4 px-4 py-3 rounded-lg bg-red-100 text-red-700 border border-red-300 shadow">
-                    {% for mess in messages %} {{ mess }}
-                    {% endfor %}
-                </div>
+                {% for mess in messages %}
+                    {% if forloop.last %}
+                        <div class="mb-4 px-4 py-3 rounded-lg 
+                            {% if 'success' in mess.tags %}bg-green-100 text-green-700 border-green-300
+                            {% elif 'error' in mess.tags or 'danger' in mess.tags %}bg-red-100 text-red-700 border-red-300
+                            {% elif 'info' in mess.tags %}bg-blue-100 text-blue-700 border-blue-300
+                            {% elif 'warning' in mess.tags %}bg-yellow-100 text-yellow-700 border-yellow-300
+                            {% else %}bg-gray-100 text-gray-700 border-gray-300
+                            {% endif %}
+                            border shadow">
+                            {{ mess }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
@@ -37,10 +47,11 @@
             </div>
         </form>
         <div class="mt-4 text-center">
-            <a href="/" class="inline-block px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-800 transition">
-              ⬅ Back to Home
+            <a href="/"
+                class="inline-block px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-800 transition">
+                ⬅ Back to Home
             </a>
-          </div>
+        </div>
     </div>
 </body>
 

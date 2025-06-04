@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django database
+db.sqlite3
+
+# Environment variables
+.env
+
+# Static & Media (if managed outside container)
+static/
+media/
+
+# VSCode or other editor configs
+.vscode/
+.idea/
+
+# OS junk files
+.DS_Store
+Thumbs.db

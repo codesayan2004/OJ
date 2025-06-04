@@ -2,16 +2,38 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Online Judge Platform - Home</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeSphere</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gradient-to-r from-gray-900 via-purple-900 to-violet-600 min-h-screen flex flex-col">
-  <header class="flex justify-between items-center p-6 bg-black bg-opacity-30 text-white shadow-md">
-    <h1 class="text-3xl font-bold tracking-wide">CodeSphere</h1>
-    <nav class="space-x-4">
+
+  <!-- Header / Navbar -->
+  <header class="p-6 bg-black bg-opacity-30 text-white shadow-md">
+    <div class="flex justify-between items-center">
+      <h1 class="text-3xl font-bold tracking-wide">CodeSphere</h1>
+
+      <!-- Mobile menu button -->
+      <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex space-x-4" id="navbar">
+        <a href="/register"
+          class="bg-white text-purple-700 px-4 py-2 rounded-lg font-semibold shadow hover:bg-gray-200 transition">Sign
+          Up</a>
+        <a href="/login"
+          class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-purple-700 transition">Login</a>
+      </nav>
+    </div>
+
+    <!-- Mobile nav -->
+    <nav class="mt-4 hidden flex-col space-y-2 md:hidden" id="mobile-menu">
       <a href="/register"
         class="bg-white text-purple-700 px-4 py-2 rounded-lg font-semibold shadow hover:bg-gray-200 transition">Sign
         Up</a>
@@ -20,6 +42,7 @@
     </nav>
   </header>
 
+  <!-- Main Hero Section -->
   <main class="flex-grow flex flex-col items-center justify-center text-white text-center px-6">
     <h2 class="text-5xl md:text-6xl font-extrabold mb-6 drop-shadow-lg">Unleash Your Coding Potential</h2>
     <p class="text-lg md:text-xl mb-10 max-w-2xl">Join our community of passionate coders. Solve problems, improve your
@@ -29,18 +52,29 @@
         class="bg-white text-purple-700 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-gray-200 transition-all duration-300">Get
         Started</a>
     </div>
-    <br><br>
+    <br /><br />
     <div class="mt-4 text-center">
       <a href="/dashboard"
-        class="inline-block px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-800 transition">
-        Go To Dashboard
+        class="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-violet-700 text-white text-sm md:text-base font-bold rounded-xl shadow-md hover:shadow-xl hover:scale-105 transform transition-all duration-300">
+        🚀 Go To Dashboard
       </a>
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="bg-black bg-opacity-30 text-center text-white py-4 text-sm">
     &copy; 2025 CodeSphere. All rights reserved.
   </footer>
+
+  <!-- Script for mobile menu toggle -->
+  <script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
 </body>
 
 </html>

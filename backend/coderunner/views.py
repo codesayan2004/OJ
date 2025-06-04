@@ -89,7 +89,10 @@ def ai_review(request, problem_id):
         return HttpResponse(template.render(context, request))
 
     
-
+def normalize(text):
+    text = text.strip().replace('\r', '')
+    lines = text.split('\n')
+    return '\n'.join(' '.join(line.split()) for line in lines)
 def submit_code(request, problem_id):
     prob = Problem.objects.get(id=problem_id)
     print(prob.title)
@@ -97,9 +100,9 @@ def submit_code(request, problem_id):
         code = request.POST.get('code')
         language = request.POST.get('language')
         input_data = request.POST.get('custom_input')
-        print("Code:", code)
-        print("Language:", language)
-        print("Input Data:", input_data)
+        # print("Code:", code)
+        # print("Language:", language)
+        # print("Input Data:", input_data)
 
         # Save the code submission to the database
         submission = CodeSubmission(
@@ -117,12 +120,17 @@ def submit_code(request, problem_id):
             input_data = test_case.input_file.read().decode('utf-8')
             expected_output = test_case.output_file.read().decode('utf-8')
             result = run(code, language, input_data)
+            result = normalize(result)
+            expected_output = normalize(expected_output)
+            # print("Summission Result:")
+            # print(result.strip())
+            # print(expected_output.strip())
             res = result
+            print(result.strip() == expected_output.strip())
             if result.strip() == expected_output.strip():
                 submission.verdict = "Accepted"
             else:
                 submission.verdict = "Wrong Answer"
-                break
         submission.status = "completed"
         # Check for compilation errors
         if submission.verdict != "Accepted":

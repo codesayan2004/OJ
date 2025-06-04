@@ -1,13 +1,15 @@
 # Virtual environment
 myenv/
+keys/
 backend/media/
-.DS_Store
+*.DS_Store
 
 # Python cache
 __pycache__/
 *.py[cod]
 
 # Other common ignores
+*.pkg
 *.env
 *.log
 *.sqlite3
