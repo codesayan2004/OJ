@@ -10,16 +10,16 @@ CodeSphere is a web application that allows users to solve programming problems,
 ![Home Page](Images/home.png)
 
 ### 📊 Dashboard Page 
-![Dashboard Page](screenshots/dashboard.png)
+![Dashboard Page](Images/dashboard.png)
 
 ### 📄 Problem Page  
-![Problems](screenshots/problems.png)
+![Problems](Images/problems.png)
 
 ### 💻 Code Area  
-![Code](screenshots/codearea.png)
+![Code](Images/codearea.png)
 
 ### 📑 Submission Page  
-![Submit](screenshots/submission.png)
+![Submit](Images/submission.png)
 
 
 ---
