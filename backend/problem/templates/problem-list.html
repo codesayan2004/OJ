@@ -1,17 +1,34 @@
 {% extends 'base.html' %}
 {% block title %}Problem List{% endblock %}
-{% block heading %}📘 Problems - CodeSphere{% endblock %}
-{% block content %} 
+{% block heading %}📘 Problems{% endblock %}
+{% block content %}
 <main class="max-w-5xl mx-auto mt-10 px-4">
   <h2 class="text-3xl font-bold text-center mb-6">🧠 Available Problems</h2>
 
-  <!-- Search Bar -->
-  <div class="mb-6">
+  <!-- Search and Filter -->
+  <div class="mb-6 flex flex-col md:flex-row gap-4 justify-center items-center">
+    <!-- Search Bar -->
     <input
       type="text"
       id="searchBar"
       placeholder="🔍 Search by title..."
-      class="w-full md:w-1/2 px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+      class="w-full md:w-1/3 px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+    />
+
+    <!-- Difficulty Filter -->
+    <select id="difficultyFilter" class="w-full md:w-1/6 px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+      <option value="">All Difficulties</option>
+      <option value="E">Easy</option>
+      <option value="M">Medium</option>
+      <option value="H">Hard</option>
+    </select>
+
+    <!-- Tag Filter (free text) -->
+    <input
+      type="text"
+      id="tagFilter"
+      placeholder="🔖 Filter by tag..."
+      class="w-full md:w-1/3 px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
     />
   </div>
 
@@ -28,11 +45,14 @@
       </thead>
       <tbody class="divide-y divide-gray-700">
         {% for problem in problems %}
-          <tr class="problem-row hover:bg-purple-800 hover:bg-opacity-30">
-            <td class="px-4 py-3">{{problem.id}}</td>
+          <tr class="problem-row hover:bg-purple-800 hover:bg-opacity-30"
+              data-title="{{ problem.title|lower }}"
+              data-difficulty="{{ problem.difficulty }}"
+              data-tags="{{ problem.tags|lower }}">
+            <td class="px-4 py-3">{{ problem.id }}</td>
             <td class="px-4 py-3">
-              <a href="/problems/{{problem.id}}" class="text-purple-300 hover:underline">
-                {{problem.title}}
+              <a href="/problems/{{ problem.id }}" class="text-purple-300 hover:underline">
+                {{ problem.title }}
               </a>
             </td>
             <td class="px-4 py-3">
@@ -46,8 +66,8 @@
                 <span class="text-gray-400">Unknown</span>
               {% endif %}
             </td>
-            <td class="px-4 py-3">{{problem.tags}}</td>
-            <td class="px-4 py-3">{{problem.author}}</td>
+            <td class="px-4 py-3">{{ problem.tags }}</td>
+            <td class="px-4 py-3">{{ problem.author }}</td>
           </tr>
         {% endfor %}
       </tbody>
@@ -55,19 +75,34 @@
   </div>
 </main>
 {% endblock %}
+
 {% block script %}
 <script>
   const searchBar = document.getElementById('searchBar');
+  const difficultyFilter = document.getElementById('difficultyFilter');
+  const tagFilter = document.getElementById('tagFilter');
   const rows = document.querySelectorAll('.problem-row');
 
-  searchBar.addEventListener('keyup', function () {
-    const query = this.value.toLowerCase().trim();
+  function filterProblems() {
+    const query = searchBar.value.toLowerCase().trim();
+    const difficulty = difficultyFilter.value;
+    const tagQuery = tagFilter.value.toLowerCase().trim();
 
     rows.forEach(row => {
-      const titleCell = row.querySelector('td:nth-child(2)');
-      const titleText = titleCell?.innerText.toLowerCase() || "";
-      row.style.display = titleText.includes(query) ? '' : 'none';
+      const title = row.dataset.title;
+      const probDifficulty = row.dataset.difficulty;
+      const tags = row.dataset.tags;
+
+      const matchesTitle = title.includes(query);
+      const matchesDifficulty = (difficulty === "" || probDifficulty === difficulty);
+      const matchesTag = (tagQuery === "" || tags.includes(tagQuery));
+
+      row.style.display = (matchesTitle && matchesDifficulty && matchesTag) ? '' : 'none';
     });
-  });
+  }
+
+  searchBar.addEventListener('input', filterProblems);
+  difficultyFilter.addEventListener('change', filterProblems);
+  tagFilter.addEventListener('input', filterProblems);
 </script>
 {% endblock %}

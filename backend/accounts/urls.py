@@ -11,5 +11,6 @@ urlpatterns = [
     path('dashboard/profile/edit/', profile_edit, name='profile_edit'),
     path('dashboard/profile/delete/', profile_delete, name='profile_del'),
     path('dashboard/profile/<int:user_id>/', profile, name='profile_with_id'),
-     
+    path('meet-the-developers/', meet_the_developers, name='meet_the_developers'),
+    path('leaderboard/', leaderboard, name='leaderboard'),
 ]

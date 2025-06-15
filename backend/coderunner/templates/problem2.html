@@ -1,143 +1,192 @@
 {% extends 'base.html' %}
-{% block title %}{{problem.title}}{% endblock %}
+
+{% block title %}{{ problem.title }}{% endblock %}
+
 {% block style %}
 <style>
-    body {
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow-x: hidden;
     }
 
     #editor {
         height: 100%;
         width: 100%;
     }
+
+    .split-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        min-height: 650px;
+        max-height: 200vh;
+    }
+
+    .panel {
+        overflow-y: auto;
+        max-height: 100%;
+    }
+
+    .resizer {
+        width: 6px;
+        cursor: col-resize;
+        background-color: #6b21a8;
+        opacity: 0.5;
+        transition: background-color 0.3s;
+    }
+
+    .resizer:hover {
+        background-color: #9333ea;
+    }
+
+    @media (max-width: 1024px) {
+        .split-container {
+            flex-direction: column;
+        }
+
+        .resizer {
+            display: none;
+        }
+
+        .panel {
+            max-height: none;
+        }
+    }
+
+    .editor-container {
+        height: 300px;
+        min-height: 350px;
+        max-height: 600px;
+    }
+
+    .output-container {
+        max-height: 400px;
+        overflow-y: auto;
+    }
 </style>
 {% endblock %}
-{% block heading %}👨‍💻 CodeSphere {% endblock %}
-{% block content %} 
-<main class="max-w-7xl mx-auto p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-    <!-- Problem Statement -->
-    <section class="bg-gray-800 bg-opacity-80 rounded-xl p-6 shadow-lg overflow-y-auto max-h-[120vh]">
-        <h2 class="text-2xl font-bold text-purple-300 mb-4">🧩Problem: {{problem.title}}</h2>
-        <p class="mb-3">{{problem.statement}}</p>
-        <h2 class="text-xl font-semibold mt-6">Input:</h2>
-        <ul class="list-disc list-inside text-sm text-gray-300">
-            {% for line in problem.input_prob.splitlines %}
-            <li>{{ line }}</li>
-            {% endfor %}
-        </ul>
-        <h2 class="text-xl font-semibold mt-6">Output:</h2>
-        <ul class="list-disc list-inside text-sm text-gray-300">
-            {% for line in problem.output_prob.splitlines %}
-            <li>{{ line }}</li>
-            {% endfor %}
-        </ul>
-        <p class="mb-2 font-semibold">Example:</p>
-        <pre class="bg-black text-green-400 p-4 rounded-lg overflow-x-auto">
-Input: 
-{{problem.sample_in}}
 
-Output:
-{{problem.sample_out}}
-    </section>
+{% block heading %}👨‍💻 CodeSphere{% endblock %}
 
-    <!-- Code Editor -->
+{% block content %}
+<main class="w-full p-0 m-0">
     <form id="code-form" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        <section class="bg-gray-800 bg-opacity-80 rounded-xl p-6 shadow-lg flex flex-col h-[120vh]">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-purple-300">🖋️ Code Here</h2>
-                <select id="language-select" name="language"
-                    class="bg-black text-white border border-purple-500 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
-                    <option value="py" {% if user_language == 'py' %}selected{% endif %}>Python</option>
-                    <option value="cpp" {% if user_language == 'cpp' %}selected{% endif %}>C++</option>
-                    <option value="c" {% if user_language == 'c' %}selected{% endif %}>C</option>
-                </select>
+        <div class="split-container">
+            <!-- Problem Panel -->
+            <section id="problem-panel" class="panel w-full lg:w-1/2 bg-gray-800 bg-opacity-80 p-6 shadow-inner">
+                <h2 class="text-2xl font-bold text-purple-300 mb-4">🧩 Problem: {{ problem.title }}</h2>
+                <p class="mb-3 whitespace-pre-wrap">{{ problem.statement }}</p>
 
-            </div>
-    
-            <div class="flex-1 w-full bg-black text-white rounded-lg overflow-hidden">
-                <div id="editor" class="rounded-lg"></div>
-                <textarea name="code" id="code" class="hidden">{{user_code}}</textarea>
-            </div>
-    
-            <div class="mt-6">
-                <label for="custom-input" class="block text-lg font-semibold text-purple-300 mb-2">🧾 Custom Input:</label>
-                <textarea name="custom_input" id="custom-input" rows="4"
-                    class="w-full bg-black text-white p-4 rounded-lg border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Enter your input here...">{{ custom_input|default:problem.sample_in }}</textarea>
-            </div>
-    
-            {% if result %}
-            <div class="mt-6 bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-lg max-h-64 overflow-auto">
-                <h2 class="text-xl font-semibold text-purple-300 mb-2">📤 Output:</h2>
-                <pre class="bg-black text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">{{ result }}</pre>
-            </div>
-            
-        {% endif %}
+                <h3 class="text-xl font-semibold mt-6">Input:</h3>
+                <ul class="list-disc list-inside text-sm text-gray-300">
+                    {% for line in problem.input_prob.splitlines %}
+                    <li>{{ line }}</li>
+                    {% endfor %}
+                </ul>
 
-        <div class="flex justify-end mt-4 space-x-4">
-            <button type="submit" id="run-button"
-                class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-md text-black font-semibold shadow">
-                ▶️ Run
-            </button>
-            <button type="submit" id="ai-review-button"
-                class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-md text-white font-semibold shadow">
-                🤖 AI Review
-            </button>
-            <button type="submit" id="submit-button"
-                class="bg-green-500 hover:bg-green-600 px-6 py-2 rounded-md text-black font-semibold shadow">
-                🚀 Submit
-            </button>
+                <h3 class="text-xl font-semibold mt-6">Output:</h3>
+                <ul class="list-disc list-inside text-sm text-gray-300">
+                    {% for line in problem.output_prob.splitlines %}
+                    <li>{{ line }}</li>
+                    {% endfor %}
+                </ul>
+
+                <h4 class="font-semibold mt-4 mb-2">Example:</h4>
+                <pre class="bg-black text-green-400 p-4 rounded-lg overflow-x-auto">
+Input:
+{{ problem.sample_in }}
+
+Output:
+{{ problem.sample_out }}
+                </pre>
+            </section>
+
+            <div class="resizer hidden lg:block"></div>
+
+            <!-- Code Panel -->
+            <section id="code-panel" class="panel w-full lg:w-1/2 bg-gray-800 bg-opacity-80 p-6 shadow-inner">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-purple-300">🖋️ Code Here</h2>
+                    <select id="language-select" name="language"
+                        class="bg-black text-white border border-purple-500 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        <option value="py" {% if user_language == 'py' %}selected{% endif %}>Python</option>
+                        <option value="cpp" {% if user_language == 'cpp' %}selected{% endif %}>C++</option>
+                        <option value="c" {% if user_language == 'c' %}selected{% endif %}>C</option>
+                    </select>
+                </div>
+
+                <div class="editor-container mb-4 w-full bg-black text-white rounded-lg overflow-hidden">
+                    <div id="editor" class="rounded-lg h-full"></div>
+                    <textarea name="code" id="code" class="hidden">{{ user_code }}</textarea>
+                </div>
+
+                <div class="mt-4">
+                    <label for="custom-input" class="block text-lg font-semibold text-purple-300 mb-2">🧾 Custom Input:</label>
+                    <textarea name="custom_input" id="custom-input" rows="4"
+                        class="w-full bg-black text-white p-4 rounded-lg border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        placeholder="Enter your input here...">{{ custom_input|default:problem.sample_in }}</textarea>
+                </div>
+
+                {% if result %}
+                <div class="output-container mt-6 bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold text-purple-300 mb-2">📤 Output:</h2>
+                    <pre class="bg-black text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">{{ result }}</pre>
+                </div>
+                {% endif %}
+
+                <div class="flex justify-end mt-4 space-x-4">
+                    <button type="submit" id="run-button"
+                        class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded-md text-black font-semibold shadow">
+                        ▶️ Run
+                    </button>
+                    <button type="submit" id="ai-review-button"
+                        class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-md text-white font-semibold shadow">
+                        🤖 AI Review
+                    </button>
+                    <button type="submit" id="submit-button"
+                        class="bg-green-500 hover:bg-green-600 px-6 py-2 rounded-md text-black font-semibold shadow">
+                        🚀 Submit
+                    </button>
+                </div>
+            </section>
         </div>
-    </section>
     </form>
 </main>
 {% endblock %}
+
 {% block script %}
-<!-- Monaco Editor Loader -->
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 <script>
     let editor;
-
-    const initialCode = `{{ user_code|escapejs }}`;  // Escapes quotes and newlines for JS safety
+    const initialCode = `{{ user_code|escapejs }}`;
     const initialLang = "{{ user_language|default:'py' }}";
 
     require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
     require(['vs/editor/editor.main'], function () {
-        editor = monaco.editor.create(document.getElementById('editor'), {
-            value: initialCode || '# Write your solution here\n',
-            language: initialLang === 'py' ? 'python' : initialLang,
-            theme: 'vs-dark',
-            fontSize: 16,
-            automaticLayout: true,
-        });
-
-        const langMap = {
-            py: 'python',
-            cpp: 'cpp',
-            c: 'cpp'
-        };
+        const langMap = { py: 'python', cpp: 'cpp', c: 'c' };
         const defaultSnippets = {
             py: '# Write your Python solution here\n',
             cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your C++ solution here\n    return 0;\n}',
             c: '#include <stdio.h>\n\nint main() {\n    // Write your C solution here\n    return 0;\n}'
         };
 
+        editor = monaco.editor.create(document.getElementById('editor'), {
+            value: initialCode || defaultSnippets[initialLang],
+            language: langMap[initialLang],
+            theme: 'vs-dark',
+            fontSize: 16,
+            automaticLayout: true,
+        });
+
         document.getElementById('language-select').addEventListener('change', function () {
             const selectedLang = this.value;
             const model = editor.getModel();
-            const currentCode = model.getValue();
-            const langMap = { py: 'python', cpp: 'cpp', c: 'c' };
-
-            // Check if the current code is empty or matches a default (optional safety)
-            const isEmpty = !currentCode.trim();
-            const isDefault = Object.values(defaultSnippets).includes(currentCode.trim());
-
             editor.setValue(defaultSnippets[selectedLang]);
-
             monaco.editor.setModelLanguage(model, langMap[selectedLang]);
         });
-
     });
 </script>
 
@@ -145,30 +194,50 @@ Output:
     const form = document.getElementById('code-form');
     const runButton = document.getElementById('run-button');
     const submitButton = document.getElementById('submit-button');
+    const aiReviewButton = document.getElementById('ai-review-button');
     const codeTextarea = document.getElementById('code');
 
-    let runUrl = '/problems/{{ problem.id }}/run/';
-    let submitUrl = '/problems/{{ problem.id }}/submit/'; // update this to your actual submit endpoint
-    let aiReviewUrl = '/problems/{{ problem.id }}/ai_review/'; // update this to your actual AI review endpoint
-    const aiReviewButton = document.getElementById('ai-review-button');
+    const runUrl = '/problems/{{ problem.id }}/run/';
+    const submitUrl = '/problems/{{ problem.id }}/submit/';
+    const aiReviewUrl = '/problems/{{ problem.id }}/ai_review/';
 
-    // Update form action based on which button is clicked
-    runButton.addEventListener('click', function () {
-        form.action = runUrl;
-    });
+    runButton.addEventListener('click', () => form.action = runUrl);
+    submitButton.addEventListener('click', () => form.action = submitUrl);
+    aiReviewButton.addEventListener('click', () => form.action = aiReviewUrl);
 
-    submitButton.addEventListener('click', function () {
-        form.action = submitUrl;
-    });
-    aiReviewButton.addEventListener('click', function () {
-        form.action = aiReviewUrl;
-    });
-
-    // Before submitting the form, sync Monaco editor content to the textarea
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', () => {
         if (editor) {
             codeTextarea.value = editor.getValue();
         }
+    });
+</script>
+
+<script>
+    const resizer = document.querySelector('.resizer');
+    const leftPanel = document.getElementById('problem-panel');
+    const rightPanel = document.getElementById('code-panel');
+    let isDragging = false;
+
+    resizer.addEventListener('mousedown', function () {
+        isDragging = true;
+        document.body.style.cursor = 'col-resize';
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!isDragging) return;
+        const containerWidth = resizer.parentNode.offsetWidth;
+        const newLeftWidth = e.clientX;
+        const newRightWidth = containerWidth - newLeftWidth - resizer.offsetWidth;
+
+        if (newLeftWidth < 200 || newRightWidth < 200) return;
+
+        leftPanel.style.width = `${newLeftWidth}px`;
+        rightPanel.style.width = `${newRightWidth}px`;
+    });
+
+    document.addEventListener('mouseup', function () {
+        isDragging = false;
+        document.body.style.cursor = 'default';
     });
 </script>
 {% endblock %}

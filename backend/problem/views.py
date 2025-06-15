@@ -54,8 +54,9 @@ def add_problem(request):
                 output_prob=output_prob
             )
             new_problem.save()  # Save the problem to the database
+            problem_id = new_problem.id
             messages.success(request, 'Problem added successfully!')
-            return redirect('/myproblems')
+            return redirect('/add_testcase/' + str(problem_id))  # Redirect to add test cases for the new problem
         else:
             contect = {}
             template = loader.get_template('add-problem.html')
@@ -64,51 +65,52 @@ def add_problem(request):
         messages.error(request, 'You must be logged in to add a problem.')
         return redirect('/login')  # Redirect to home if not logged in
     
-def particular_problem(request, problem_id):
-    if request.user.is_authenticated:
-        problem = Problem.objects.get(id=problem_id)
-        context = {
-            'problem': problem,
-        }
-        template = loader.get_template('problem2.html')
-        return HttpResponse(template.render(context, request))
-    else:
-        messages.error(request, 'You must be logged in to edit a problem.')
-        return redirect('/login')  # Redirect to home if not logged in
-    
 def delete_problem(request, problem_id):
     if request.user.is_authenticated:
         try:
             problem = Problem.objects.get(id=problem_id)
+            if problem.author != request.user:
+                messages.error(request, 'You are not authorized to delete this problem.')
+                return redirect('/myproblems')
+
             problem.delete()
             messages.success(request, 'Problem deleted successfully!')
         except Problem.DoesNotExist:
             messages.error(request, 'Problem not found.')
     else:
         messages.error(request, 'You must be logged in to delete a problem.')
-    return redirect('/myproblems')  # Redirect to home if not logged in
+
+    return redirect('/myproblems')
+
 
 def update_problem(request, problem_id):
     if request.user.is_authenticated:
-        problem = Problem.objects.get(id=problem_id)
-        if request.method == 'POST':
-            problem.title = request.POST.get('title')
-            problem.statement = request.POST.get('statement')
-            problem.sample_in = request.POST.get('sample_in')
-            problem.sample_out = request.POST.get('sample_out')
-            problem.tags = request.POST.get('tags')
-            problem.difficulty = request.POST.get('difficulty')
-            problem.input_prob = request.POST.get('input')
-            problem.output_prob = request.POST.get('output')
-            problem.save()
-            messages.success(request, 'Problem updated successfully!')
+        try:
+            problem = Problem.objects.get(id=problem_id)
+            if problem.author != request.user:
+                messages.error(request, 'You are not authorized to edit this problem.')
+                return redirect('/myproblems')
+
+            if request.method == 'POST':
+                problem.title = request.POST.get('title')
+                problem.statement = request.POST.get('statement')
+                problem.sample_in = request.POST.get('sample_in')
+                problem.sample_out = request.POST.get('sample_out')
+                problem.tags = request.POST.get('tags')
+                problem.difficulty = request.POST.get('difficulty')
+                problem.input_prob = request.POST.get('input')
+                problem.output_prob = request.POST.get('output')
+                problem.save()
+                messages.success(request, 'Problem updated successfully!')
+                return redirect('/myproblems')
+            else:
+                context = {'problem': problem}
+                template = loader.get_template('update-problem.html')
+                return HttpResponse(template.render(context, request))
+
+        except Problem.DoesNotExist:
+            messages.error(request, 'Problem not found.')
             return redirect('/myproblems')
-        else:
-            context = {
-                'problem': problem,
-            }
-            template = loader.get_template('update-problem.html')
-            return HttpResponse(template.render(context, request))
     else:
         messages.error(request, 'You must be logged in to edit a problem.')
-        return redirect('/login')  # Redirect to home if not logged in
+        return redirect('/login')

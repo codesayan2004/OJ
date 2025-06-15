@@ -38,7 +38,7 @@
                         <td class="px-6 py-4">
                             {% if submission.verdict == "Accepted" %}
                             <span class="text-green-500 font-bold">✔️ {{ submission.verdict }}</span>
-                            {% elif submission.verdict == "Wrong Answer" %}
+                            {% elif "Wrong Answer" in submission.verdict %}
                             <span class="text-red-500 font-bold">❌ {{ submission.verdict }}</span>
                             {% else %}
                             <span class="text-yellow-500 font-bold">⚠️ {{ submission.verdict }}</span>

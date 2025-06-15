@@ -26,10 +26,12 @@ SECRET_KEY = 'django-insecure-v&=kk3ay+#bnqia8s0_2a%32hhwp7!bs4v+e0=5!#882hd8*82
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['65.2.99.28', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['65.2.99.28', 'localhost', '127.0.0.1','codespher.me', 'www.codespher.me']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'  # or os.path.join(BASE_DIR, 'media')
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -126,3 +128,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://codespher.me",
+    "https://www.codespher.me",
+]

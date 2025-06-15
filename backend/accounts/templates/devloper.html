@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Meet the Developer | CodeSphere{% endblock %}
+{% block heading %}👨‍💻 Meet the Developer {% endblock %}
+{% load static %}
+
+{% block content %}
+<main class="max-w-5xl mx-auto p-6 mt-16 bg-white rounded-lg shadow-lg">
+    <section class="flex flex-col md:flex-row items-center md:items-start gap-10">
+        <!-- Developer Photo -->
+        <div class="flex-shrink-0">
+            <img src="{% static 'images/developer-photo.jpg' %}" alt="Photo of Sayan Mandal"
+                class="rounded-full w-48 h-48 md:w-56 md:h-56 object-cover shadow-lg hover:scale-105 transition-transform duration-300"
+                loading="lazy" />
+        </div>
+
+        <!-- Developer Info -->
+        <div class="text-center md:text-left">
+            <h2 class="text-4xl font-extrabold mb-4 text-purple-700">Hi, I’m Sayan Mandal!</h2>
+            <p class="text-gray-700 mb-4 leading-relaxed">
+                B.Tech CSE student @ IIT Guwahati — passionate coder, creative dreamer & lifelong learner.
+            </p>
+
+            <p class="text-gray-700 mb-6 leading-relaxed">
+                I built CodeSphere to help fellow coders grow & sharpen their problem-solving skills.
+                When not coding, I enjoy singing 🎤, movies 🎬, and exploring nature 🌿.
+            </p>
+
+            <!-- Social Links -->
+            <div class="flex flex-wrap justify-center md:justify-start gap-4 mb-6">
+                <a href="https://www.linkedin.com/in/sayan-mandal-iitg/" target="_blank"
+                    class="bg-blue-700 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-800 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.8 0-5 2.2-5 5v14c0 2.8 2.2 5 5 5h14c2.8 0 5-2.2 5-5v-14c0-2.8-2.2-5-5-5zm-11 19h-3v-9h3v9zm-1.5-10.3c-1 0-1.7-.8-1.7-1.7s.7-1.7 1.7-1.7 1.7.8 1.7 1.7-.7 1.7-1.7 1.7zm13.5 10.3h-3v-4.7c0-1.1 0-2.5-1.5-2.5s-1.8 1.2-1.8 2.4v4.8h-3v-9h2.8v1.2h.1c.4-.8 1.4-1.7 2.9-1.7 3.1 0 3.7 2 3.7 4.7v4.8z"/></svg> 
+                    LinkedIn
+                </a>
+
+                <a href="https://github.com/codesayan2004" target="_blank"
+                    class="bg-gray-900 text-white px-4 py-2 rounded-full font-semibold hover:bg-black transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.4.7-4.1-1.5-4.1-1.5-.5-1.2-1.3-1.5-1.3-1.5-1.1-.8.1-.8.1-.8 1.3.1 2 .9 2 .9 1.1 2 2.9 1.4 3.6 1.1.1-.8.4-1.4.7-1.8-2.7-.3-5.6-1.4-5.6-6a4.7 4.7 0 011.3-3.2 4.3 4.3 0 01.1-3.2s1-.3 3.3 1.3a11.4 11.4 0 016 0c2.3-1.6 3.3-1.3 3.3-1.3a4.3 4.3 0 01.1 3.2 4.7 4.7 0 011.3 3.2c0 4.6-2.9 5.7-5.6 6 .4.3.7.9.7 1.8v2.7c0 .3.2.7.8.6A12 12 0 0012 .5z"/></svg>
+                    GitHub
+                </a>
+
+                <a href="https://www.instagram.com/sayan_mandal04/" target="_blank"
+                    class="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white px-4 py-2 rounded-full font-semibold hover:opacity-90 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.3 2.2.5.5.2.9.5 1.3.9s.7.8.9 1.3c.2.4.4 1 .5 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.8-.5 2.2-.2.5-.5.9-.9 1.3s-.8.7-1.3.9c-.4.2-1 .4-2.2.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.3-2.2-.5-.5-.2-.9-.5-1.3-.9s-.7-.8-.9-1.3c-.2-.4-.4-1-.5-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.3-1.8.5-2.2.2-.5.5-.9.9-1.3s.8-.7 1.3-.9c.4-.2 1-.4 2.2-.5 1.3-.1 1.7-.1 4.9-.1m0-2.2C8.7 0 8.2 0 7 .1 5.9.2 5 .4 4.2.7c-.8.3-1.5.7-2.2 1.4S.9 3.4.7 4.2C.4 5 .2 5.9.1 7 0 8.2 0 8.7 0 12s0 3.8.1 5c.1 1.1.3 2 .6 2.8.3.8.7 1.5 1.4 2.2s1.4 1.1 2.2 1.4c.8.3 1.7.5 2.8.6 1.2.1 1.7.1 5 .1s3.8 0 5-.1c1.1-.1 2-.3 2.8-.6.8-.3 1.5-.7 2.2-1.4s1.1-1.4 1.4-2.2c.3-.8.5-1.7.6-2.8.1-1.2.1-1.7.1-5s0-3.8-.1-5c-.1-1.1-.3-2-.6-2.8-.3-.8-.7-1.5-1.4-2.2S19 1 18.2.7C17.4.4 16.5.2 15.4.1 14.2 0 13.7 0 12 0z"/><path d="M12 5.8a6.2 6.2 0 106.2 6.2A6.2 6.2 0 0012 5.8zm0 10.2a4 4 0 114-4 4 4 0 01-4 4zm6.4-10.9a1.4 1.4 0 11-1.4-1.4 1.4 1.4 0 011.4 1.4z"/></svg>
+                    Instagram
+                </a>
+
+                <a href="https://www.youtube.com/@sayan_mandal04" target="_blank"
+                    class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-700 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.5 6.2s-.2-1.6-.8-2.3c-.8-.8-1.6-.8-2-1C17.4 2.2 12 2.2 12 2.2h-.1S6.6 2.2 3.3 2.9c-.5.2-1.2.3-2 1C.8 4.6.6 6.2.6 6.2S0 8.1 0 10v3.9s.2 1.6.8 2.3c.8.8 1.9.7 2.4.8C6.6 17.8 12 17.8 12 17.8s5.4 0 8.7-.8c.5-.2 1.2-.3 2-1 .6-.7.8-2.3.8-2.3V10s0-1.9-.5-3.8zM9.6 13.4v-5.2l5.2 2.6-5.2 2.6z"/></svg>
+                    YouTube
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills -->
+    <section class="mt-12">
+        <h3 class="text-2xl font-bold mb-4 text-purple-600">Skills & Technologies</h3>
+        <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">Python</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">Django</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">JavaScript</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">React</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">C++</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">Machine Learning</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">Git</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">GitHub</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">AWS</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">Cloud</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">C</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">Java</span>
+            <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">Docker</span>
+        </div>
+    </section>
+
+    <!-- More About Me -->
+    <section class="mt-12">
+        <h3 class="text-2xl font-bold mb-4 text-purple-600">More About Me</h3>
+        <ul class="list-disc list-inside space-y-2 text-gray-700">
+            <li>Driven by creativity — aspiring to act & tell stories through cinema someday 🎥.</li>
+            <li>Competitive programmer targeting Google & Microsoft internships 👨‍💻.</li>
+            <li>Nature lover, Guiter and Ukulele player & Hindi music enthusiast 🎶.</li>
+            <li>Always eager to learn, build, collaborate & grow 🚀.</li>
+        </ul>
+    </section>
+
+    <div class="mt-10 text-center">
+        <a href="/dashboard" class="inline-block px-6 py-3 text-white bg-gray-800 hover:bg-gray-700 rounded-xl font-medium transition">
+            ⬅ Back to Dashboard
+        </a>
+    </div>
+</main>
+{% endblock %}

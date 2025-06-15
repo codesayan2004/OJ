@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Leaderboard{% endblock %}
+{% block heading %}🏆 Leaderboard {% endblock %}
+{% block content %}
+<div class="p-8">
+  <h1 class="text-3xl font-bold text-center text-purple-600 mb-6">🏆 Leaderboard</h1>
+  <table class="min-w-full bg-gray-800 text-white rounded-lg shadow">
+    <thead class="bg-purple-700">
+      <tr>
+        <th class="py-3 px-6 text-left">Rank</th>
+        <th class="py-3 px-6 text-left">Username</th>
+        <th class="py-3 px-6 text-left">Problems Solved</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in leaderboard %}
+      <tr class="{% cycle 'bg-gray-900' 'bg-gray-800' %} hover:bg-gray-700">
+        <td class="py-3 px-6">
+          {% if forloop.counter == 1 %}
+            🥇
+          {% elif forloop.counter == 2 %}
+            🥈
+          {% elif forloop.counter == 3 %}
+            🥉
+          {% else %}
+            {{ forloop.counter }}
+          {% endif %}
+        </td>
+        <td class="py-3 px-6 font-semibold">{{ entry.username }}</td>
+        <td class="py-3 px-6">{{ entry.unique_accepted }}</td>
+      </tr>
+      
+      {% empty %}
+      <tr>
+        <td colspan="3" class="text-center py-6">No accepted submissions yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

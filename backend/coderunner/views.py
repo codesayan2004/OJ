@@ -16,77 +16,81 @@ import google.generativeai as genai
 # Create your views here.
 
 def particular_problem(request, problem_id, *args, **kwargs):
-    if request.user.is_authenticated:
-        problem = Problem.objects.get(id=problem_id)
-        context = {
-            'problem': problem,
-            'user_code': kwargs.get('user_code', ''),  # Code submitted by the user
-            'user_language': kwargs.get('user_language', 'py'),  # Language selected by the user
-            'custom_input': kwargs.get('custom_input', ''),  # Custom input provided by the user
-            'result': kwargs.get('result', ''),  # Result of the code execution
-        }
-        #template = loader.get_template('part_problem.html')
-        template = loader.get_template('problem2.html')
-        return HttpResponse(template.render(context, request))
-    else:
-        messages.error(request, 'You must be logged in to view problem.')
-        return redirect('/login')
+    problem = Problem.objects.get(id=problem_id)
+    context = {
+        'problem': problem,
+        'user_code': kwargs.get('user_code', ''),  # Code submitted by the user
+        'user_language': kwargs.get('user_language', 'py'),  # Language selected by the user
+        'custom_input': kwargs.get('custom_input', ''),  # Custom input provided by the user
+        'result': kwargs.get('result', ''),  # Result of the code execution
+    }
+    #template = loader.get_template('part_problem.html')
+    template = loader.get_template('problem2.html')
+    return HttpResponse(template.render(context, request))
 
 def run_particular_problem(request, problem_id):
-    prob = Problem.objects.get(id=problem_id)
-    if request.method == 'POST':
-        code = request.POST.get('code')
-        language = request.POST.get('language')
-        input_data = request.POST.get('custom_input')
-        print("Running of code Successful!")
-        # Run the code
-        result = run(code, language, input_data)
-        context = {
-            'problem': prob,
-            'custom_input': input_data,
-            'result': result,
-            'user_code': code,
-            'user_language': language,
-        }
-        return particular_problem(request, problem_id, user_code=code, user_language=language, custom_input=input_data, result=result)
-        # template = loader.get_template('problem2.html')
-        # return HttpResponse(template.render(context, request))
+    if request.user.is_authenticated:
+        prob = Problem.objects.get(id=problem_id)
+        if request.method == 'POST':
+            code = request.POST.get('code')
+            language = request.POST.get('language')
+            input_data = request.POST.get('custom_input')
+            print("Running of code Successful!")
+            # Run the code
+            result = run(code, language, input_data)
+            context = {
+                'problem': prob,
+                'custom_input': input_data,
+                'result': result,
+                'user_code': code,
+                'user_language': language,
+            }
+            return particular_problem(request, problem_id, user_code=code, user_language=language, custom_input=input_data, result=result)
+            # template = loader.get_template('problem2.html')
+            # return HttpResponse(template.render(context, request))
 
+        else:
+            context = {
+                'problem': prob,
+                'user_code': '',  # No code initially
+                'user_language': 'py',
+            }
+            return redirect('/problems/' + str(problem_id) + '/')
+            # template = loader.get_template('part_problem.html')
+            # return HttpResponse(template.render(context, request))
     else:
-        context = {
-            'problem': prob,
-            'user_code': '',  # No code initially
-            'user_language': 'py',
-        }
-        return redirect('/problems/' + str(problem_id) + '/')
-        # template = loader.get_template('part_problem.html')
-        # return HttpResponse(template.render(context, request))
+        messages.error(request, 'You must be logged in to run code.')
+        return redirect('/login')
 
 genai.configure(api_key="AIzaSyBMBYNtPXegEqCdduQ_lGA8UTlo2dUHPMk")
 model = genai.GenerativeModel("gemini-1.5-flash")
 def ai_review(request, problem_id):
-    prob = Problem.objects.get(id=problem_id)
-    if request.method == 'POST':
-        run_particular_problem(request,problem_id)
-        code = request.POST.get('code')
-        language = request.POST.get('language')
-        print("Code for AI:", code)
-        prompt = f"Please review the following code and give suggestions for improvemen any bug/error. Dont provide any code. only give short text suggession:\n\n{code}"
-        #prompt = "What is Google Gemini"
-        response = model.generate_content(prompt)
-        template = loader.get_template("ai-review.html")
-        context = {
-            'problem':prob,
-            'ai_feedback': response.text,
-            'user_code': code
-        }
-        return HttpResponse(template.render(context,request))
+    if request.user.is_authenticated:
+        prob = Problem.objects.get(id=problem_id)
+        if request.method == 'POST':
+            run_particular_problem(request,problem_id)
+            code = request.POST.get('code')
+            language = request.POST.get('language')
+            print("Code for AI:", code)
+            prompt = f"Please review the following code and give suggestions for improvemen any bug/error. Dont provide any code. only give short text suggession:\n\n{code}"
+            #prompt = "What is Google Gemini"
+            response = model.generate_content(prompt)
+            template = loader.get_template("ai-review.html")
+            context = {
+                'problem':prob,
+                'ai_feedback': response.text,
+                'user_code': code
+            }
+            return HttpResponse(template.render(context,request))
+        else:
+            context = {
+                'problem': prob,
+            }
+            template = loader.get_template('problem2.html')
+            return HttpResponse(template.render(context, request))
     else:
-        context = {
-            'problem': prob,
-        }
-        template = loader.get_template('problem2.html')
-        return HttpResponse(template.render(context, request))
+        messages.error(request, 'You must be logged in to use AI review.')
+        return redirect('/login')
 
     
 def normalize(text):
@@ -94,69 +98,74 @@ def normalize(text):
     lines = text.split('\n')
     return '\n'.join(' '.join(line.split()) for line in lines)
 def submit_code(request, problem_id):
-    prob = Problem.objects.get(id=problem_id)
-    print(prob.title)
-    if request.method == 'POST':
-        code = request.POST.get('code')
-        language = request.POST.get('language')
-        input_data = request.POST.get('custom_input')
-        # print("Code:", code)
-        # print("Language:", language)
-        # print("Input Data:", input_data)
+    if request.user.is_authenticated:
+        prob = Problem.objects.get(id=problem_id)
+        print(prob.title)
+        if request.method == 'POST':
+            code = request.POST.get('code')
+            language = request.POST.get('language')
+            input_data = request.POST.get('custom_input')
+            # print("Code:", code)
+            # print("Language:", language)
+            # print("Input Data:", input_data)
 
-        # Save the code submission to the database
-        submission = CodeSubmission(
-            user=request.user,
-            prob=prob,
-            code=code,
-            language=language,
-        )
-        submission.save()
-        # Run the code
-        submission.verdict = "No Test Cases found"
-        res = ""
-        test_cases = TestCase.objects.filter(problem=prob)
-        for test_case in test_cases:
-            input_data = test_case.input_file.read().decode('utf-8')
-            expected_output = test_case.output_file.read().decode('utf-8')
-            result = run(code, language, input_data)
-            result = normalize(result)
-            expected_output = normalize(expected_output)
-            # print("Summission Result:")
-            # print(result.strip())
-            # print(expected_output.strip())
-            res = result
-            print(result.strip() == expected_output.strip())
-            if result.strip() == expected_output.strip():
-                submission.verdict = "Accepted"
-            else:
-                submission.verdict = "Wrong Answer"
-        submission.status = "completed"
-        # Check for compilation errors
-        if submission.verdict != "Accepted":
-            if "Error" in res:
-                submission.verdict = "Compilation Error"
-            elif "Time Limit Exceeded" in res:
-                submission.verdict = "Time Limit Exceeded"
-            else:
-                submission.verdict = "Wrong Answer"
-        print("Submission Successful!")
-        # Save the verdict
-        submission.save()
-        # Redirect to a success page or render a template with the result
-        template = loader.get_template('all_my_sub.html')
-        sub = CodeSubmission.objects.filter(prob=prob, user=request.user).order_by('-submission_time')
-        context = {
-            'submissions': sub,
-        }
-        return HttpResponse(template.render(context, request))
+            # Save the code submission to the database
+            submission = CodeSubmission(
+                user=request.user,
+                prob=prob,
+                code=code,
+                language=language,
+            )
+            submission.save()
+            # Run the code
+            submission.verdict = "No Test Cases found"
+            res = ""
+            test_cases = TestCase.objects.filter(problem=prob)
+            i=0
+            for test_case in test_cases:
+                i += 1
+                input_data = test_case.input_file.read().decode('utf-8')
+                expected_output = test_case.output_file.read().decode('utf-8')
+                result = run(code, language, input_data)
+                result = normalize(result)
+                expected_output = normalize(expected_output)
+                # print("Summission Result:")
+                # print(result.strip())
+                # print(expected_output.strip())
+                res = result
+                print(result.strip() == expected_output.strip())
+                if result.strip() == expected_output.strip():
+                    submission.verdict = "Accepted"
+                else:
+                    submission.verdict = f"Wrong Answer in test {i}"
+                    break
+            submission.status = "completed"
+            # Check for compilation errors
+            if submission.verdict != "Accepted":
+                if "Error" in res:
+                    submission.verdict = "Compilation Error"
+                elif "Time Limit Exceeded" in res:
+                    submission.verdict = "Time Limit Exceeded"
+            print("Submission Successful!")
+            # Save the verdict
+            submission.save()
+            # Redirect to a success page or render a template with the result
+            template = loader.get_template('all_my_sub.html')
+            sub = CodeSubmission.objects.filter(prob=prob, user=request.user).order_by('-submission_time')
+            context = {
+                'submissions': sub,
+            }
+            return HttpResponse(template.render(context, request))
+        else:
+            problem = Problem.objects.get(id=problem_id)
+            template = loader.get_template('part_problem.html')
+            context = {
+                'problem': problem,
+            }
+            return HttpResponse(template.render(context, request))
     else:
-        problem = Problem.objects.get(id=problem_id)
-        template = loader.get_template('part_problem.html')
-        context = {
-            'problem': problem,
-        }
-        return HttpResponse(template.render(context, request))
+        messages.error(request, 'You must be logged in to submit code.')
+        return redirect('/login')
     
 # Real Run code
 def run(code, language, input_data):

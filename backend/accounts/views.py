@@ -7,6 +7,7 @@ from django.template import loader
 from django.contrib.messages import get_messages
 from coderunner.models import CodeSubmission
 from problem.models import Problem
+from django.db.models import Count
 # Create your views here.
 
 def home(request):
@@ -119,3 +120,27 @@ def profile_delete(request):
     else:
         messages.info(request, "You need to login first")
         return redirect('/login')
+    
+def meet_the_developers(request):
+    template = loader.get_template('devloper.html')
+    context = {}
+    return HttpResponse(template.render(context, request))
+
+def leaderboard(request):
+    leaderboard = (
+        CodeSubmission.objects
+        .filter(verdict='Accepted')
+        .values('user')
+        .annotate(unique_accepted=Count('prob', distinct=True))
+        .order_by('-unique_accepted')
+    )
+
+    # Fetch usernames for convenience
+    user_ids = [entry['user'] for entry in leaderboard]
+    users = User.objects.filter(id__in=user_ids).values('id', 'username')
+    user_map = {u['id']: u['username'] for u in users}
+
+    for entry in leaderboard:
+        entry['username'] = user_map.get(entry['user'], 'Unknown')
+
+    return render(request, 'leaderboard.html', {'leaderboard': leaderboard})

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" x-data="{ showModal: false, modalCode: '' }">
 
@@ -57,7 +58,7 @@
         };
     </script>
 
-
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     {% block style %}{% endblock %}
 </head>
 
@@ -67,42 +68,48 @@
         <div class="flex items-center justify-between">
             <h1 class="text-2xl sm:text-3xl font-bold">{% block heading %}{% endblock %}</h1>
             <button class="md:hidden text-white focus:outline-none" onclick="toggleMenu()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
+                ...
             </button>
 
             <!-- Desktop Navigation -->
-            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center space-x-2 lg:space-x-4 text-sm md:text-base">
-                <a href="/problems"
-                    class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Problems</a>
-                <a href="/myproblems" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">My
-                    Problems</a>
-                <a href="/mysubmissions"
-                    class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Submissions</a>
-                <a href="/add_problem" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Add
-                    Problem</a>
-                <a href="/dashboard/profile/"
-                    class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Profile</a>
-                <a href="/logout"
-                    class="ml-1 md:ml-2 px-3 md:px-4 py-1.5 md:py-2 bg-purple-700 rounded-lg hover:bg-purple-800 transition font-semibold">
-                    Logout
-                </a>
+                {% if user.is_authenticated %}
+                    <a href="/dashboard" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Dashboard</a>
+                    <a href="/leaderboard" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Leaderboard</a>
+                    <a href="/problems" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Problems</a>
+                    <a href="/myproblems" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">My Problems</a>
+                    <a href="/mysubmissions" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Submissions</a>
+                    <a href="/add_problem" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Add Problem</a>
+                    <a href="/dashboard/profile/" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Profile</a>
+                    <a href="/logout" class="ml-1 md:ml-2 px-3 md:px-4 py-1.5 md:py-2 bg-purple-700 rounded-lg hover:bg-purple-800 transition font-semibold">Logout</a>
+                {% else %}
+                    <a href="/" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Home</a>
+                    <a href="/leaderboard" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Leaderboard</a>
+                    <a href="/problems" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Problems</a>
+                    <a href="/register" class="px-2 md:px-3 py-1.5 md:py-2 hover:bg-purple-700 rounded-md transition">Signup</a>
+                    <a href="/login" class="ml-1 md:ml-2 px-3 md:px-4 py-1.5 md:py-2 bg-purple-700 rounded-lg hover:bg-purple-800 transition font-semibold">Login</a>
+                {% endif %}
             </nav>
-
         </div>
 
         <!-- Mobile Menu -->
         <nav id="mobile-menu" class="md:hidden mt-4 flex flex-col space-y-2 text-lg hidden">
-            <a href="/problems" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Problems</a>
-            <a href="/myproblems" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">My Problems</a>
-            <a href="/mysubmissions" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Submissions</a>
-            <a href="/add_problem" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Add Problem</a>
-            <a href="/dashboard/profile/" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Profile</a>
-            <a href="/logout"
-                class="px-4 py-2 bg-purple-700 rounded-lg hover:bg-purple-800 transition text-center font-semibold">Logout</a>
+            {% if user.is_authenticated %}
+                <a href="/dashboard" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Dashboard</a>
+                <a href="/leaderboard" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Leaderboard</a>
+                <a href="/problems" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Problems</a>
+                <a href="/myproblems" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">My Problems</a>
+                <a href="/mysubmissions" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Submissions</a>
+                <a href="/add_problem" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Add Problem</a>
+                <a href="/dashboard/profile/" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Profile</a>
+                <a href="/logout" class="px-4 py-2 bg-purple-700 rounded-lg hover:bg-purple-800 transition text-center font-semibold">Logout</a>
+            {% else %}
+                <a href="/" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Home</a>
+                <a href="/leaderboard" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Leaderboard</a>
+                <a href="/problems" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Problems</a>
+                <a href="/register" class="px-4 py-2 hover:bg-purple-700 rounded-md transition">Signup</a>
+                <a href="/login" class="px-4 py-2 bg-purple-700 rounded-lg hover:bg-purple-800 transition text-center font-semibold">Login</a>
+            {% endif %}
         </nav>
     </header>
 
