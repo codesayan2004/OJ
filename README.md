@@ -7,7 +7,7 @@ CodeSphere is a web application that allows users to solve programming problems,
 ## 🖼️ Screenshots
 
 ### 🏠 Home Page   
-![Home Page](screenshots/home.png)
+![Home Page](Images/home.png)
 
 ### 📊 Dashboard Page 
 ![Dashboard Page](screenshots/dashboard.png)
