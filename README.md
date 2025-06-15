@@ -1,5 +1,6 @@
 # 🧑‍⚖️ CodeSphere - Online Coding Platform
-🔗 [Live Website](https://www.codespher.me)
+🔗 [Live Website](https://www.codespher.me)  
+🎥 [Live Demo Video]([https://your-video-link-here](https://www.loom.com/share/6e6c058402d240bcab52e2c7ff3ca1b5?sid=c7ad9b1d-9abf-4488-a14d-735e2b5dc817))
 
 CodeSphere is a web application that allows users to solve programming problems, compile code online, submit solutions for automated evaluation, and add problems — similar to platforms like Codeforces and LeetCode.
 
@@ -60,6 +61,10 @@ OJ/
 - Submission history and results
 
 ---
+## 🎥 Live Demo
+
+Check out a quick demo of CodeSphere in action:  
+👉 [Watch the demo video here]([https://your-video-link-here](https://www.loom.com/share/6e6c058402d240bcab52e2c7ff3ca1b5?sid=c7ad9b1d-9abf-4488-a14d-735e2b5dc817))
 
 ## 🛠️ Setup Instructions from GitHub
 > **Note:** Python 3.9+ is recommended.
