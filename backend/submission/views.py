@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from django.template import loader
 from problem.models import Problem
 from submission.models import TestCase
+from django.core.files.base import ContentFile
 import os
 
 # Create your views here.
@@ -19,25 +20,43 @@ def enter_test_case(request, pid):
             'pid': pid
         }
         return HttpResponse(template.render(context, request))
-    
+
 def test_case(request, pid, no):
     if request.method == 'POST':
-        print("From TC: ",pid)
+        print("From TC: ", pid)
         problem = Problem.objects.get(id=pid)
         print(problem)
-        for i in range(no):
-            input_data = request.FILES.get('input_' + str(i))
-            output_data = request.FILES.get('output_' + str(i))
-            print("Input: ", input_data)
-            print("Output: ", output_data)
-            TestCase.objects.create(problem=problem, input_file=input_data, output_file=output_data)
-            print("Instance created")
+
+        for i in range(int(no)):
+            # Try to get input: file or text
+            input_file = request.FILES.get(f'input_file_{i}')
+            input_text = request.POST.get(f'input_text_{i}')
+
+            output_file = request.FILES.get(f'output_file_{i}')
+            output_text = request.POST.get(f'output_text_{i}')
+
+            # Convert text to file if file not provided
+            if not input_file and input_text:
+                input_file = ContentFile(input_text.encode('utf-8'), name=f'input_{i}.txt')
+
+            if not output_file and output_text:
+                output_file = ContentFile(output_text.encode('utf-8'), name=f'output_{i}.txt')
+
+            if not input_file or not output_file:
+                print(f"Missing testcase #{i}. Skipping...")
+                continue  # Skip invalid testcases
+
+            # Save to database
+            TestCase.objects.create(problem=problem, input_file=input_file, output_file=output_file)
+            print(f"TestCase {i} created.")
+
         return redirect('/myproblems')
+
     else:
         print("from add tc", pid)
         template = loader.get_template('upload_tc.html')
         context = {
-            'cnt' : range(no),
+            'cnt': range(int(no)),
         }
         return HttpResponse(template.render(context, request))
 

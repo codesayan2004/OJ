@@ -6,48 +6,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upload Testcases | CodeSphere</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function toggleInputMode(index, mode) {
+      const fileInput = document.getElementById(`file_mode_${index}`);
+      const textInput = document.getElementById(`text_mode_${index}`);
+      const fileOutput = document.getElementById(`file_mode_${index}_out`);
+      const textOutput = document.getElementById(`text_mode_${index}_out`);
+
+      if (mode === 'file') {
+        fileInput.classList.remove('hidden');
+        fileOutput.classList.remove('hidden');
+        textInput.classList.add('hidden');
+        textOutput.classList.add('hidden');
+      } else {
+        fileInput.classList.add('hidden');
+        fileOutput.classList.add('hidden');
+        textInput.classList.remove('hidden');
+        textOutput.classList.remove('hidden');
+      }
+    }
+  </script>
 </head>
 
-<body class="bg-gradient-to-br from-gray-900 to-purple-900 min-h-screen flex items-center justify-center text-white px-4">
-  <div class="bg-black bg-opacity-60 p-8 rounded-xl shadow-xl w-full max-w-4xl">
-    <h2 class="text-3xl font-bold mb-6 text-center">📁 Upload Testcases</h2>
+<body class="bg-gradient-to-br from-gray-900 to-purple-900 min-h-screen flex items-center justify-center px-4 py-8 text-white">
+  <div class="bg-gray-950 bg-opacity-90 p-8 rounded-2xl shadow-2xl w-full max-w-6xl">
+    <h2 class="text-4xl font-extrabold mb-8 text-center text-purple-300 tracking-wide">📁 Upload Testcases</h2>
 
-    <form method="POST" enctype="multipart/form-data" class="overflow-x-auto">
+    <form method="POST" enctype="multipart/form-data" class="overflow-x-auto space-y-6">
       {% csrf_token %}
 
-      <table class="w-full text-left border-collapse mb-6">
+      <table class="w-full table-auto border-collapse">
         <thead>
-          <tr class="bg-purple-800 text-white">
-            <th class="px-6 py-3 text-sm font-semibold uppercase tracking-wider">Testcase #</th>
-            <th class="px-6 py-3 text-sm font-semibold uppercase tracking-wider">Input File</th>
-            <th class="px-6 py-3 text-sm font-semibold uppercase tracking-wider">Output File</th>
+          <tr class="bg-purple-800 text-white text-sm uppercase">
+            <th class="px-4 py-3 text-left font-semibold">Testcase #</th>
+            <th class="px-4 py-3 text-left font-semibold">Input</th>
+            <th class="px-4 py-3 text-left font-semibold">Output</th>
           </tr>
         </thead>
         <tbody>
           {% for i in cnt %}
-          <tr class="bg-gray-800 border-b border-purple-700">
-            <td class="px-6 py-4">{{ i|add:1 }}</td>
-            <td class="px-6 py-4">
-              <input type="file" name="input_{{ i }}" required
-                class="w-full bg-gray-900 text-white border border-purple-500 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600" />
+          <tr class="bg-gray-900 border-b border-purple-700">
+            <td class="px-4 py-6 align-top">
+              <div class="text-lg font-semibold text-purple-400">{{ i|add:1 }}</div>
+              <div class="mt-3 flex gap-2">
+                <button type="button" onclick="toggleInputMode('{{ i }}', 'file')"
+                  class="px-3 py-1 text-xs rounded-full bg-purple-700 hover:bg-purple-800 transition">File</button>
+                <button type="button" onclick="toggleInputMode('{{ i }}', 'text')"
+                  class="px-3 py-1 text-xs rounded-full bg-purple-700 hover:bg-purple-800 transition">Text</button>
+              </div>
             </td>
-            <td class="px-6 py-4">
-              <input type="file" name="output_{{ i }}" required
-                class="w-full bg-gray-900 text-white border border-purple-500 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600" />
+
+            <!-- Input Column -->
+            <td class="px-4 py-4">
+              <!-- File Upload -->
+              <div id="file_mode_{{ i }}">
+                <input type="file" name="input_file_{{ i }}"
+                  class="w-full bg-gray-800 border border-purple-500 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-purple-600">
+              </div>
+              <!-- Textarea -->
+              <div id="text_mode_{{ i }}" class="hidden mt-4">
+                <textarea name="input_text_{{ i }}" rows="4"
+                  class="w-full bg-gray-800 border border-purple-500 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-purple-600"
+                  placeholder="Enter input text here..."></textarea>
+              </div>
+            </td>
+
+            <!-- Output Column -->
+            <td class="px-4 py-4">
+              <!-- File Upload -->
+              <div id="file_mode_{{ i }}_out">
+                <input type="file" name="output_file_{{ i }}"
+                  class="w-full bg-gray-800 border border-purple-500 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-purple-600">
+              </div>
+              <!-- Textarea -->
+              <div id="text_mode_{{ i }}_out" class="hidden mt-4">
+                <textarea name="output_text_{{ i }}" rows="4"
+                  class="w-full bg-gray-800 border border-purple-500 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-purple-600"
+                  placeholder="Enter output text here..."></textarea>
+              </div>
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
 
-      <button type="submit"
-        class="w-full bg-purple-700 hover:bg-purple-800 text-white font-semibold py-3 rounded-lg transition-all">
-        💾 Save Testcases
-      </button>
+      <div class="pt-4">
+        <button type="submit"
+          class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 rounded-xl transition duration-300">
+          💾 Save Testcases
+        </button>
+      </div>
     </form>
 
     <div class="mt-6 text-center">
-      <a href="/" class="text-sm text-gray-300 hover:underline">⬅ Back to Dashboard</a>
+      <a href="/" class="text-sm text-purple-300 hover:underline">⬅ Back to Dashboard</a>
     </div>
   </div>
 </body>
