@@ -185,6 +185,11 @@ def run(code, language, input_data):
     input_file = inputs_dir / f"{unique}_input.txt"
     output_file = outputs_dir / f"{unique}_output.txt"
     exe_file = codes_dir / unique
+    
+    if language == 'java':
+        code_file = codes_dir / "Main.java"  # Always Main.java for Java
+    else:
+        code_file = codes_dir / f"{unique}.{language}"
 
     # Save code and input to files
     code_file.write_text(code)
@@ -241,7 +246,24 @@ def run(code, language, input_data):
                 return "Time Limit Exceeded"
             except Exception as e:
                 return f"Runtime Error: {str(e)}"
+        elif language == 'java':
+            compile_cmd = ['javac', str(code_file)]
+            compile_result = subprocess.run(compile_cmd, capture_output=True, text=True)
+            if compile_result.returncode != 0:
+                return "Compilation Error:\n" + compile_result.stderr
 
+            with open(input_file, 'r') as f, open(output_file, 'w') as out_f:
+                subprocess.run(
+                    ['java', '-cp', str(codes_dir), 'Main'],
+                    stdin=f, stdout=out_f, stderr=subprocess.STDOUT, timeout=5
+                )
+
+        elif language == 'js':
+            with open(input_file, 'r') as f, open(output_file, 'w') as out_f:
+                subprocess.run(
+                    ['node', str(code_file)],
+                    stdin=f, stdout=out_f, stderr=subprocess.STDOUT, timeout=5
+                )
         else:
             return "Unsupported language"
         return output_file.read_text()
