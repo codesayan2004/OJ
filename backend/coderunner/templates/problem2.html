@@ -132,12 +132,13 @@ Output:
                         placeholder="Enter your input here...">{{ custom_input|default:problem.sample_in }}</textarea>
                 </div>
 
-                {% if result %}
-                <div class="output-container mt-6 bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-lg">
-                    <h2 class="text-xl font-semibold text-purple-300 mb-2">📤 Output:</h2>
-                    <pre class="bg-black text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">{{ result }}</pre>
+                <div id="output-box" class="output-container mt-6 bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-lg {% if not result %}hidden{% endif %}">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-xl font-semibold text-purple-300">📤 Output:</h2>
+                        <span id="output-meta" class="text-sm text-gray-300"></span>
+                    </div>
+                    <pre id="output-text" class="bg-black text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">{{ result }}</pre>
                 </div>
-                {% endif %}
 
                 <div class="flex justify-end mt-4 space-x-4">
                     <button type="submit" id="run-button"
@@ -212,13 +213,61 @@ Output:
     const submitUrl = '/problems/{{ problem.id }}/submit/';
     const aiReviewUrl = '/problems/{{ problem.id }}/ai_review/';
 
-    runButton.addEventListener('click', () => form.action = runUrl);
     submitButton.addEventListener('click', () => form.action = submitUrl);
     aiReviewButton.addEventListener('click', () => form.action = aiReviewUrl);
 
     form.addEventListener('submit', () => {
         if (editor) {
             codeTextarea.value = editor.getValue();
+        }
+    });
+
+    // Run: execute in the sandbox via fetch() and show the result instantly,
+    // without reloading the page or losing the editor state.
+    const outputBox = document.getElementById('output-box');
+    const outputText = document.getElementById('output-text');
+    const outputMeta = document.getElementById('output-meta');
+    const statusColors = {
+        'OK': 'text-green-400',
+        'Compilation Error': 'text-red-400',
+        'Runtime Error': 'text-red-400',
+        'Time Limit Exceeded': 'text-yellow-400',
+        'Memory Limit Exceeded': 'text-yellow-400',
+    };
+
+    runButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+        if (editor) codeTextarea.value = editor.getValue();
+        runButton.disabled = true;
+        runButton.textContent = '⏳ Running...';
+        outputBox.classList.remove('hidden');
+        outputText.className = 'bg-black text-gray-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap';
+        outputText.textContent = 'Compiling and running in the sandbox...';
+        outputMeta.textContent = '';
+        try {
+            const response = await fetch(runUrl, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            });
+            if (response.redirected || response.status === 403) {
+                window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+            const data = await response.json();
+            const color = statusColors[data.status] || 'text-red-400';
+            outputText.className = `bg-black ${color} p-4 rounded-lg overflow-x-auto whitespace-pre-wrap`;
+            outputText.textContent = data.output || '(no output)';
+            outputMeta.textContent = data.status === 'OK'
+                ? `✔ ${data.time_ms} ms`
+                : `${data.status}${data.time_ms ? ' · ' + data.time_ms + ' ms' : ''}`;
+        } catch (err) {
+            outputText.className = 'bg-black text-red-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap';
+            outputText.textContent = 'Could not reach the server. Please try again.';
+        } finally {
+            runButton.disabled = false;
+            runButton.textContent = '▶️ Run';
         }
     });
 </script>

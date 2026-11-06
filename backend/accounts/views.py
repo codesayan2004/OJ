@@ -8,6 +8,8 @@ from django.contrib.messages import get_messages
 from coderunner.models import CodeSubmission
 from problem.models import Problem
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 # Create your views here.
 
 def home(request):
@@ -25,6 +27,9 @@ def register_user(request):
         # Perform validation checks here
         if (password != confirn_password):
             messages.error(request,"Password Do Not Match")
+            return redirect('/register')
+        if not username or not password:
+            messages.error(request, "Username and password are required")
             return redirect('/register')
         user = User.objects.filter(username=username)
         if user.exists():
@@ -87,10 +92,11 @@ def dashboard(request):
         messages.info(request, "You need to login first")
         return redirect('/login')
     
-def profile(request):
+def profile(request, user_id=None):
     if request.user.is_authenticated:
         template = loader.get_template('profile.html')
-        context = {"user": request.user}
+        shown = get_object_or_404(User, id=user_id) if user_id else request.user
+        context = {"profile_user": shown, "is_own_profile": shown == request.user}
         return HttpResponse(template.render(context, request))
     else:
         messages.info(request, "You need to login first")
@@ -114,6 +120,7 @@ def profile_edit(request):
         messages.info(request, "You need to login first")
         return redirect('/login')
     
+@require_POST  # deleting an account must be an explicit, CSRF-protected POST
 def profile_delete(request):
     if request.user.is_authenticated:
         user = request.user

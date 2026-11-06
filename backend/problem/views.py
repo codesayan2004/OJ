@@ -1,16 +1,17 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .models import Problem  
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.template import loader
+from django.views.decorators.http import require_POST
+
+from .models import Problem
 
 
 # Create your views here.
 def problem_list(request):
     # This is a placeholder. In a real application, you would fetch problems from the database.
-    problems = Problem.objects.all()  # Fetch all problems from the database
+    problems = Problem.objects.select_related('author').order_by('-created_at')
     context = {
         'problems': problems,
     }
@@ -65,21 +66,15 @@ def add_problem(request):
         messages.error(request, 'You must be logged in to add a problem.')
         return redirect('/login')  # Redirect to home if not logged in
     
+@login_required
+@require_POST  # a GET link must never delete data (CSRF-safe)
 def delete_problem(request, problem_id):
-    if request.user.is_authenticated:
-        try:
-            problem = Problem.objects.get(id=problem_id)
-            if problem.author != request.user:
-                messages.error(request, 'You are not authorized to delete this problem.')
-                return redirect('/myproblems')
-
-            problem.delete()
-            messages.success(request, 'Problem deleted successfully!')
-        except Problem.DoesNotExist:
-            messages.error(request, 'Problem not found.')
-    else:
-        messages.error(request, 'You must be logged in to delete a problem.')
-
+    problem = get_object_or_404(Problem, id=problem_id)
+    if problem.author != request.user:
+        messages.error(request, 'You are not authorized to delete this problem.')
+        return redirect('/myproblems')
+    problem.delete()
+    messages.success(request, 'Problem deleted successfully!')
     return redirect('/myproblems')
 
 

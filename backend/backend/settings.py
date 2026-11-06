@@ -17,21 +17,65 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v&=kk3ay+#bnqia8s0_2a%32hhwp7!bs4v+e0=5!#882hd8*82'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+def env_list(name, default=""):
+    return [x.strip() for x in os.environ.get(name, default).split(",") if x.strip()]
 
-ALLOWED_HOSTS = ['65.2.99.28', 'localhost', '127.0.0.1','codespher.me', 'www.codespher.me']
+
+def load_dotenv(path):
+    """Tiny .env loader (KEY=value lines) so local runs need no extra package."""
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_dotenv(BASE_DIR.parent / ".env")
+
+# All secrets and environment-specific values come from environment variables
+# (see .env.example at the repository root). Nothing secret lives in git.
+DEBUG = env_bool("DJANGO_DEBUG", False)
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "dev-only-insecure-key-do-not-use-in-production"
+    else:
+        raise RuntimeError("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is off")
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,codespher.me,www.codespher.me")
+CSRF_TRUSTED_ORIGINS = env_list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS", "https://codespher.me,https://www.codespher.me"
+)
+
+# Persistent data (SQLite file, uploaded test cases) lives under DATA_DIR,
+# which docker-compose mounts as a volume so it survives redeploys.
+DATA_DIR = Path(os.environ.get("DJANGO_DATA_DIR", BASE_DIR))
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'  # or os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = Path(os.environ.get("DJANGO_MEDIA_ROOT", DATA_DIR / 'media'))
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = Path(os.environ.get("DJANGO_STATIC_ROOT", BASE_DIR / 'staticfiles'))
+
+# Gemini (AI code review)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+
+# Code-execution sandbox (see coderunner/sandbox.py)
+SANDBOX_BACKEND = os.environ.get("SANDBOX_BACKEND", "docker")          # docker | local
+SANDBOX_IMAGE = os.environ.get("SANDBOX_IMAGE", "codesphere-runner:latest")
+SANDBOX_WORK_DIR = os.environ.get("SANDBOX_WORK_DIR", str(BASE_DIR / "sandbox_runs"))
+SANDBOX_TIME_LIMIT = float(os.environ.get("SANDBOX_TIME_LIMIT", "2"))   # seconds of CPU per test
+SANDBOX_MEMORY_MB = int(os.environ.get("SANDBOX_MEMORY_MB", "256"))
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -83,7 +127,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': Path(os.environ.get("DJANGO_DB_PATH", DATA_DIR / 'db.sqlite3')),
     }
 }
 
@@ -129,7 +173,21 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://codespher.me",
-    "https://www.codespher.me",
-]
+LOGIN_URL = '/login/'
+
+# Production hardening. Nginx terminates HTTPS and forwards X-Forwarded-Proto.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    USE_X_FORWARDED_HOST = True
+    SESSION_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", True)
+    CSRF_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", True)
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "0"))
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO")},
+}

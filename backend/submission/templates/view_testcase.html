@@ -30,7 +30,7 @@
 
           <td class="px-6 py-4">
             {% if tc.input_file %}
-            <a href="{{ tc.input_file.url }}" download class="text-blue-400 hover:text-blue-300 underline">
+            <a href="{% url 'download_test_case' tc.id 'input' %}" class="text-blue-400 hover:text-blue-300 underline">
               ⬇ Download Input
             </a>
             {% else %}
@@ -40,7 +40,7 @@
 
           <td class="px-6 py-4">
             {% if tc.output_file %}
-            <a href="{{ tc.output_file.url }}" download class="text-blue-400 hover:text-blue-300 underline">
+            <a href="{% url 'download_test_case' tc.id 'output' %}" class="text-blue-400 hover:text-blue-300 underline">
               ⬇ Download Output
             </a>
             {% else %}

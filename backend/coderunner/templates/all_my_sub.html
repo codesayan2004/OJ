@@ -43,6 +43,12 @@
                             {% else %}
                             <span class="text-yellow-500 font-bold">⚠️ {{ submission.verdict }}</span>
                             {% endif %}
+                            {% if submission.total_tests %}
+                            <div class="text-xs text-gray-400 mt-1">{{ submission.passed_tests }}/{{ submission.total_tests }} tests · {{ submission.time_ms }} ms</div>
+                            {% endif %}
+                            {% if submission.error_message %}
+                            <details class="text-xs text-gray-300 mt-1"><summary class="cursor-pointer">details</summary><pre class="whitespace-pre-wrap max-w-md">{{ submission.error_message|truncatechars:1500 }}</pre></details>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4 text-center">
                             <button class="text-purple-400 hover:text-purple-200 transition"

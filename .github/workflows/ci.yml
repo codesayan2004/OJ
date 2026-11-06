@@ -1,0 +1,48 @@
+name: CI / Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:      # manual "Run workflow" button pushes images to ECR
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DJANGO_DEBUG: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python manage.py check
+      - name: Build sandbox runner image
+        working-directory: .
+        run: docker build -f sandbox/Dockerfile -t codesphere-runner:latest .
+      - name: Run tests inside the Docker sandbox
+        run: python manage.py test
+        env:
+          SANDBOX_BACKEND: docker
+          SANDBOX_WORK_DIR: /tmp/codesphere-runs
+
+  push-to-ecr:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-south-1' }}
+      - name: Build and push to Amazon ECR
+        run: ./deploy/ecr_push.sh "${GITHUB_SHA::7}"
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}

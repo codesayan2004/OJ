@@ -25,70 +25,128 @@ CodeSphere is a web application that allows users to solve programming problems,
 
 
 ---
+## 🏗️ Architecture
+
+```
+Browser (Monaco Editor + Tailwind CSS)
+   │  HTTPS
+   ▼
+Nginx  ── TLS (Let's Encrypt), serves /static/, rate-limits run/submit
+   │  HTTP
+   ▼
+Gunicorn ── Django 5.2 (accounts · problem · submission · coderunner)
+   │  Docker API (/var/run/docker.sock)
+   ▼
+Sandbox container per run  ── codesphere-runner image (gcc, g++, JDK 17, Python 3, Node)
+   --network none · --memory 256m · --cpus 1 · --pids-limit 128
+   --read-only · --cap-drop ALL · no-new-privileges · user nobody
+```
+
+All of it ships as Docker images (`codesphere-web`, `codesphere-runner`) stored in
+**Amazon ECR** and run on **AWS EC2** with Docker Compose.
+
 ## 📁 Project Structure
----
+
 ```bash
 OJ/
-├── backend/           # Django backend (views, models, admin)
-├── accounts/          # Handles user registration and login
-├── problem/           # Problem models and views
-├── submission/        # Submission logic and code evaluation
-├── media/             # Uploaded test case files
-├── templates/         # Frontend HTML templates
-├── db.sqlite3         # SQLite database file
-├── Dockerfile         # Docker configuration
-├── requirements.txt   # Python dependencies
-└── manage.py          # Django management script
+├── backend/                 # Django project
+│   ├── backend/             # settings (env-driven), urls, wsgi
+│   ├── accounts/            # registration, login, dashboard, leaderboard, profile
+│   ├── problem/             # problem CRUD
+│   ├── submission/          # hidden test-case upload / download (author only)
+│   ├── coderunner/          # run, submit, AI review
+│   │   ├── sandbox.py       # Docker sandbox + judge (compile once, run each test)
+│   │   └── judge_exec.py    # in-container wrapper: CPU-time limit, exit status
+│   ├── templates/           # base template (Tailwind CSS)
+│   ├── Dockerfile           # web image: Django + Gunicorn
+│   ├── gunicorn.conf.py     # Gunicorn workers / timeouts / logging
+│   └── entrypoint.sh        # migrate + collectstatic, then start Gunicorn
+├── sandbox/Dockerfile       # runner image: compilers for C, C++, Java, Python, JS
+├── deploy/
+│   ├── nginx/               # codesphere.conf (HTTPS) and local.conf (HTTP)
+│   ├── ecr_push.sh          # build + push both images to Amazon ECR
+│   ├── ec2_bootstrap.sh     # one-time EC2 setup (Docker, AWS CLI, swap)
+│   ├── ec2_deploy.sh        # pull from ECR, docker compose up
+│   └── init_letsencrypt.sh  # first HTTPS certificate
+├── docker-compose.yml       # nginx + web + runner
+├── .env.example             # all configuration (secrets stay out of git)
+└── DEPLOYMENT.md            # step-by-step AWS deployment guide
 ```
 
 ## ⚙️ Tech Stack
 
-- **Backend:** Django (Python)
-- **Frontend:** HTML/CSS/JavaScript
-- **Database:** SQLite3 (for development)
-- **Containerization:** Docker
-- **Cloud Hosting:** AWS EC2 (Amazon Web Services)
-- **DevOps:** Docker Hub (for image storage)
-- **Others:** Git, GitHub
+- **Backend:** Django 5.2 (Python), SQLite
+- **Frontend:** Django templates, Tailwind CSS, Monaco Editor (VS Code's editor)
+- **Code execution:** one throw-away Docker container per run/test, from a dedicated runner image
+- **Serving:** Gunicorn (WSGI) behind Nginx (reverse proxy, TLS, static files, rate limiting)
+- **Cloud:** AWS EC2 (host), Amazon ECR (image registry), Let's Encrypt (HTTPS)
+- **AI:** Google Gemini code review
+- **CI:** GitHub Actions (tests in the Docker sandbox, manual push to ECR)
+
 ---
 
 ## 🚀 Features
 
-- User registration and login (email/password)
-- Online code compilation (with support for multiple languages)
-- Submit solutions and get verdicts (Accepted, Wrong Answer, TLE, Compilation Error etc.)
-- Admin panel for problem management
-- Custom test case evaluation
-- Submission history and results
+- Registration / login (Django auth, PBKDF2-hashed passwords, CSRF protection)
+- Problems with difficulty and tags; authors add hidden test cases (file upload or paste)
+- Monaco editor with **C, C++, Java, Python and JavaScript**
+- **Run** on custom input: executed in the sandbox and shown instantly (AJAX, no page reload)
+- **Submit**: compiled once, judged against every hidden test case, verdicts:
+  Accepted · Wrong Answer on test *n* · Compilation Error · Runtime Error ·
+  Time Limit Exceeded · Memory Limit Exceeded, with CPU time and tests passed
+- AI code review (Gemini) that gives hints, not code
+- Dashboard, leaderboard, submission history
 
----
-## 🎥 Live Demo
+## 🔒 Sandboxed execution
 
-Check out a quick demo of CodeSphere in action:  
-👉 [Watch the demo video here](https://www.loom.com/share/6e6c058402d240bcab52e2c7ff3ca1b5?sid=69f12c30-e11b-4f6b-855d-496de3cf566f)
+`backend/coderunner/sandbox.py` writes each submission to its own temporary
+directory and runs the compiler and every test case in a **fresh container**:
 
+| Limit | How |
+| --- | --- |
+| No network | `--network none` |
+| Memory 256 MB (MLE) | `--memory 256m --memory-swap 256m` (cgroup OOM kill) |
+| CPU time 2 s (TLE) | `judge-exec` sets `RLIMIT_CPU` and measures the program's own CPU time |
+| No fork bombs | `--pids-limit 128` |
+| Can't modify the system | `--read-only` root fs, code mounted read-only while running, `/tmp` is a small tmpfs |
+| No privileges | `--user 65534` (nobody), `--cap-drop ALL`, `--security-opt no-new-privileges` |
+| Nothing persists | `--rm`; the work directory is deleted after judging |
 
-## 🛠️ Setup Instructions from GitHub
-> **Note:** Python 3.9+ is recommended.
+Tests in `backend/coderunner/tests.py` check each of these (network blocked,
+write to `/etc` fails, uid is 65534, fork bomb contained, TLE, MLE, CE, RE).
+
+## 🛠️ Run locally with Docker (recommended)
 
 ```bash
-git clone https://github.com/codesayan2004/OJ.git
-cd OJ
-python -m venv myenv
-source myenv/bin/activate
-cd backend
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
+git clone https://github.com/codesayan2004/OJ.git && cd OJ
+cp .env.example .env          # set DJANGO_SECRET_KEY, DJANGO_SECURE_COOKIES=0 for http://localhost
+sudo mkdir -p /var/lib/codesphere/runs && sudo chown 1000:1000 /var/lib/codesphere/runs
+DOCKER_GID=$(stat -c %g /var/run/docker.sock) docker compose up --build
 ```
-## 🛠️ Setup Instructions from DockerHub
+Open http://localhost (Nginx → Gunicorn → Django).
+
+## 🛠️ Run locally without Docker (development)
 
 ```bash
-docker pull sayan2004/codesphere
-docker run -d -p 8000:8000 sayan2004/codesphere
+python -m venv myenv && source myenv/bin/activate
+cd backend && pip install -r requirements.txt
+export DJANGO_DEBUG=1 SANDBOX_BACKEND=local   # local = plain subprocess, NOT sandboxed
+python manage.py migrate && python manage.py runserver
 ```
-Then open:
-➡️ http://localhost:8000
+
+Run the tests: `python manage.py test` (add `SANDBOX_BACKEND=docker` after
+`docker build -f sandbox/Dockerfile -t codesphere-runner .` to test the real sandbox).
+
+## ☁️ Deploy to AWS (EC2 + ECR)
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)**. In short:
+
+```bash
+AWS_ACCOUNT_ID=<id> AWS_REGION=ap-south-1 ./deploy/ecr_push.sh   # laptop / CI
+sudo ./deploy/ec2_bootstrap.sh                                    # once, on EC2
+AWS_ACCOUNT_ID=<id> ./deploy/ec2_deploy.sh                        # every release
+EMAIL=<you> ./deploy/init_letsencrypt.sh                          # once, HTTPS
+```
 
 ## 📄 License
 
