@@ -1,7 +1,22 @@
 # Virtual environment
 myenv/
+venv/
+.venv/
 keys/
+
+# Secrets: copy .env.example to .env
+.env
+*.env
+
+# Runtime data (kept in Docker volumes in production)
 backend/media/
+backend/staticfiles/
+backend/sandbox_runs/
+backend/codes/
+backend/inputs/
+backend/outputs/
+*.sqlite3
+
 *.DS_Store
 
 # Python cache
@@ -10,7 +25,5 @@ __pycache__/
 
 # Other common ignores
 *.pkg
-*.env
 *.log
-*.sqlite3
 *.egg-info/

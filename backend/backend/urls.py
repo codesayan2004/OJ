@@ -27,5 +27,6 @@ urlpatterns = [
     path('', include('submission.urls')),
     path('', include('coderunner.urls')),
 ]
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# In production Nginx serves /static/ directly; /media/ (hidden test cases)
+# is never public - files are streamed by submission.views.download_test_case.
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

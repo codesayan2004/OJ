@@ -4,19 +4,21 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Django database
+# Local data never goes into the image
 db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+sandbox_runs/
+codes/
+inputs/
+outputs/
 
-# Environment variables
+# Environment variables / secrets
 .env
 
-# Static & Media (if managed outside container)
-media/
-
-# VSCode or other editor configs
+# Editor and OS files
 .vscode/
 .idea/
-
-# OS junk files
 .DS_Store
 Thumbs.db
